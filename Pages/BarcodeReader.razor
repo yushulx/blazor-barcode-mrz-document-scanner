@@ -1,0 +1,28 @@
+﻿@page "/barcodereader"
+@inject IJSRuntime JSRuntime
+
+<button class="btn btn-primary" @onclick="ReadBarcodes">Read Barcodes from Files</button>
+<p style="color:green;font-style:italic">@result</p>
+
+@code {
+    private static String result = "No Barcode Found";
+
+    // https://stackoverflow.com/questions/59084133/calling-an-instance-method-in-a-razor-page-from-javascript
+    protected override void OnInitialized()
+    {
+        JSRuntime.InvokeVoidAsync("jsFunctions.init", DotNetObjectReference.Create(this));
+    }
+    
+    public async Task ReadBarcodes()
+    {
+        await JSRuntime.InvokeVoidAsync(
+                "jsFunctions.selectFile");
+    }
+
+    [JSInvokable]
+    public void ReturnBarcodeResultsAsync(String text)
+    {
+        result = text;
+        this.StateHasChanged();
+    }
+}
