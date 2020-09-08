@@ -21,3 +21,5 @@ The sample shows how to implement a web barcode reader app by using [Dynamsoft J
     ![blazor barcode sample](https://www.dynamsoft.com/codepool/wp-content/uploads/2020/09/blazor-barcode-result.png)
 
     
+## Blog
+[How to Build Web Barcode Reader with Blazor WebAssembly](https://www.dynamsoft.com/codepool/web-barcode-reader-blazor-webassembly.html)
