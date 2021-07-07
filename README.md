@@ -5,7 +5,7 @@ The sample shows how to implement a web barcode reader app by using [Dynamsoft J
 1. Get a trial license from [Dynamsoft portal](https://www.dynamsoft.com/CustomerPortal/Portal/Triallicense.aspx) and then update the following line in `wwwroot/index.html`:
   
     ```html
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@7.6.0/dist/dbr.js" data-productKeys="LICENSE-KEY"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-javascript-barcode@8.4.0/dist/dbr.js" data-productKeys="LICENSE-KEY"></script>
     ```
     
 2. Run the app:
