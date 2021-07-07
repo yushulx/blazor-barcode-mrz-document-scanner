@@ -2,6 +2,7 @@
 @inject IJSRuntime JSRuntime
 
 <button class="btn btn-primary" @onclick="ReadBarcodes">Read Barcodes from Files</button>
+<button class="btn btn-primary" @onclick="LiveScan">Live Scan</button>
 <p style="color:green;font-style:italic">@result</p>
 
 @code {
@@ -12,11 +13,17 @@
     {
         JSRuntime.InvokeVoidAsync("jsFunctions.init", DotNetObjectReference.Create(this));
     }
-    
+
     public async Task ReadBarcodes()
     {
         await JSRuntime.InvokeVoidAsync(
                 "jsFunctions.selectFile");
+    }
+
+    public async Task LiveScan()
+    {
+        await JSRuntime.InvokeVoidAsync(
+                "jsFunctions.liveScan");
     }
 
     [JSInvokable]
