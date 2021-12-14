@@ -18,7 +18,7 @@ The sample shows how to implement a web barcode reader app by using [Dynamsoft J
 
     ![code93 image](https://www.dynamsoft.com/codepool/wp-content/uploads/2020/09/code93.png)
     
-    ![blazor barcode sample](https://www.dynamsoft.com/codepool/wp-content/uploads/2020/09/blazor-barcode-result.png)
+    ![blazor barcode sample](https://www.dynamsoft.com/codepool/img/2020/09/blazor-barcode-result.png)
 
     
 ## Blog
