@@ -1,8 +1,6 @@
-var barcodereader = null;
 let barcodescanner = null;
 var dotnetRef = null;
 (async () => {
-    barcodereader = await (barcodereader = barcodereader || Dynamsoft.DBR.BarcodeReader.createInstance());
     barcodescanner = await (barcodescanner = barcodescanner || Dynamsoft.DBR.BarcodeScanner.createInstance());
 })();
 
@@ -17,7 +15,7 @@ window.jsFunctions = {
         input.onchange = async function () {
             try {
                 let file = input.files[0];
-                let results = await barcodereader.decode(file);
+                let results = await barcodescanner.decode(file);
                 returnResultsAsString(results);
             } catch (ex) {
                 alert(ex.message);
