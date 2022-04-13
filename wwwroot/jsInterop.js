@@ -1,7 +1,8 @@
 let barcodescanner = null;
 var dotnetRef = null;
 (async () => {
-    barcodescanner = await (barcodescanner = barcodescanner || Dynamsoft.DBR.BarcodeScanner.createInstance());
+    Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
+    barcodescanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
 })();
 
 window.jsFunctions = {
@@ -10,22 +11,26 @@ window.jsFunctions = {
         dotnetRef = obj;
     },
     selectFile: async function () {
-        let input = document.createElement("input");
-        input.type = "file";
-        input.onchange = async function () {
-            try {
-                let file = input.files[0];
-                let results = await barcodescanner.decode(file);
-                returnResultsAsString(results);
-            } catch (ex) {
-                alert(ex.message);
-                throw ex;
-            }
-        };
-        input.click();
+        if (barcodescanner) {
+            let input = document.createElement("input");
+            input.type = "file";
+            input.onchange = async function () {
+                try {
+                    let file = input.files[0];
+                    let results = await barcodescanner.decode(file);
+                    returnResultsAsString(results);
+                } catch (ex) {
+                    alert(ex.message);
+                    throw ex;
+                }
+            };
+            input.click();
+        } else {
+            alert("The barcode reader is still initializing.");
+        }
     },
     liveScan: async function () {
-        try {
+        if (barcodescanner) {
             barcodescanner.onFrameRead = results => {
                 console.log("onFrameRead");
             };
@@ -34,9 +39,8 @@ window.jsFunctions = {
                 await barcodescanner.hide();
             };
             await barcodescanner.show();
-        } catch (ex) {
-            alert(ex.message);
-            throw ex;
+        } else {
+            alert("The barcode reader is still initializing.");
         }
     },
 };
