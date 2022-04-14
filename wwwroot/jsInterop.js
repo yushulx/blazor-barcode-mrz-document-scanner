@@ -3,6 +3,7 @@ var dotnetRef = null;
 (async () => {
     Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     barcodescanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
+    barcodescanner.updateRuntimeSettings("balance"); 
 })();
 
 window.jsFunctions = {
@@ -31,12 +32,14 @@ window.jsFunctions = {
     },
     liveScan: async function () {
         if (barcodescanner) {
-            barcodescanner.onFrameRead = results => {
-                console.log("onFrameRead");
-            };
-            barcodescanner.onUnduplicatedRead = async (txt, result) => {
-                returnResultsAsString([result]);
-                await barcodescanner.hide();
+            barcodescanner.onFrameRead = async results => {
+                if (results.length > 0) {
+                    console.log("onFrameRead");
+                    returnResultsAsString(results);
+                    if (barcodescanner.isOpen()) {
+                        await barcodescanner.hide();
+                    }
+                }
             };
             await barcodescanner.show();
         } else {
