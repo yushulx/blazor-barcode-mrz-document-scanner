@@ -1,15 +1,20 @@
 let barcodescanner = null;
-var dotnetRef = null;
-(async () => {
-    Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
-    barcodescanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
-    barcodescanner.updateRuntimeSettings("balance"); 
-})();
+let dotnetRef = null;
 
 window.jsFunctions = {
-    init: function (obj) {
+    init: async function (obj) {
         console.log("init");
-        dotnetRef = obj;
+        let result = true;
+        try {
+            Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
+            barcodescanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
+            await barcodescanner.updateRuntimeSettings("balance");
+            dotnetRef = obj;
+        } catch (e) {
+            console.log(e);
+            result = false;
+        }
+        return result;
     },
     selectFile: async function () {
         if (barcodescanner) {
