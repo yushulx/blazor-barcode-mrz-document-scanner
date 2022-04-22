@@ -20,6 +20,8 @@ The sample shows how to implement a web barcode and QR code reader app by using 
     
     ![blazor barcode sample](https://www.dynamsoft.com/codepool/img/2020/09/blazor-barcode-result.png)
 
-    
+## Online Demo
+[https://yushulx.me/blazor-barcode-qrcode-reader-scanner/](https://yushulx.me/blazor-barcode-qrcode-reader-scanner/)
+
 ## Blog
 [How to Build Web Barcode Reader with Blazor WebAssembly](https://www.dynamsoft.com/codepool/web-barcode-reader-blazor-webassembly.html)
