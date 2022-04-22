@@ -7,16 +7,32 @@
 }
 else
 {
-    <button class="btn btn-primary" @onclick="ReadBarcodes">Read Barcodes from Files</button>
-    <button class="btn btn-primary" @onclick="LiveScan">Live Scan</button>
-    <p style="color:green;font-style:italic">@result</p>
+    <InputFile OnChange="LoadImage" />
+    @* <button @onclick="ReadBarcodes">Read Barcodes from Files</button> *@
+    <button @onclick="LiveScan">Live Scan</button>
+    <p class="p-result">@result</p>
+
+    <div id="imageview">
+        <img id="image" />
+    </div>
+    
 }
-
-
 
 @code { 
     String result = "";
     Boolean initialized = false;
+
+    @* https://docs.microsoft.com/en-us/aspnet/core/blazor/images?view=aspnetcore-6.0 *@
+    private async Task LoadImage(InputFileChangeEventArgs e)
+    {
+        var imageFile = e.File;
+        @* var resizedImage = 
+            await imageFile.RequestImageFileAsync("image/jpg", 640, 640); *@
+        var jsImageStream = imageFile.OpenReadStream(1024 * 1024 * 20);
+        var dotnetImageStream = new DotNetStreamReference(jsImageStream);
+        await JSRuntime.InvokeVoidAsync("jsFunctions.setImageUsingStreaming", 
+            "image", dotnetImageStream);
+    }
 
     // https://stackoverflow.com/questions/59084133/calling-an-instance-method-in-a-razor-page-from-javascript
     protected override void OnInitialized()

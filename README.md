@@ -1,8 +1,8 @@
-# Blazor Barcode Sample
-The sample shows how to implement a web barcode reader app by using [Dynamsoft JavaScript Barcode SDK](https://www.dynamsoft.com/Products/barcode-recognition-javascript.aspx) and [Blazor WebAssembly](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor).
+# Blazor Barcode and QR Code Reader
+The sample shows how to implement a web barcode and QR code reader app by using [Dynamsoft JavaScript Barcode SDK](https://www.dynamsoft.com/Products/barcode-recognition-javascript.aspx) and [Blazor WebAssembly](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor).
 
 ## Usage
-1. Get a trial license from [Dynamsoft portal](https://www.dynamsoft.com/CustomerPortal/Portal/Triallicense.aspx) and then update the following line in `wwwroot/jsInterop.js`:
+1. Get a trial license from [Dynamsoft portal](https://www.dynamsoft.com/customer/license/trialLicense?product=dbr) and then update the following line in `wwwroot/jsInterop.js`:
   
     ```js
     Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";

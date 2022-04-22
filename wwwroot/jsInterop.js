@@ -1,13 +1,34 @@
 let barcodescanner = null;
 let dotnetRef = null;
+var wrapper = new DBRWrapper();
 
 window.jsFunctions = {
+    setImageUsingStreaming: async function setImageUsingStreaming(imageElementId, imageStream) {
+        const arrayBuffer = await imageStream.arrayBuffer();
+        const blob = new Blob([arrayBuffer]);
+        const url = URL.createObjectURL(blob);
+        document.getElementById(imageElementId).src = url;
+        document.getElementById(imageElementId).style.display = 'block';
+
+        if (barcodescanner) {
+            try {
+                let results = await barcodescanner.decode(blob);
+                returnResultsAsString(results);
+            } catch (ex) {
+                alert(ex.message);
+                throw ex;
+            }
+        }
+        
+      },
     init: async function (obj) {
         console.log("init");
         let result = true;
         try {
             Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
-            barcodescanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
+            barcodescanner = await wrapper.createDefaultScanner((results) => {
+                returnResultsAsString(results);
+            });
             await barcodescanner.updateRuntimeSettings("balance");
             dotnetRef = obj;
         } catch (e) {
@@ -37,16 +58,9 @@ window.jsFunctions = {
     },
     liveScan: async function () {
         if (barcodescanner) {
-            barcodescanner.onFrameRead = async results => {
-                if (results.length > 0) {
-                    console.log("onFrameRead");
-                    returnResultsAsString(results);
-                    if (barcodescanner.isOpen()) {
-                        await barcodescanner.hide();
-                    }
-                }
-            };
+            wrapper.clearOverlay();
             await barcodescanner.show();
+            wrapper.patchOverlay();
         } else {
             alert("The barcode reader is still initializing.");
         }
