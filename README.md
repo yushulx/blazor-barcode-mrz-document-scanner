@@ -18,7 +18,7 @@ The sample shows how to implement a web barcode and QR code reader app by using 
 
     ![code93 image](https://www.dynamsoft.com/codepool/wp-content/uploads/2020/09/code93.png)
     
-    ![blazor barcode sample](https://www.dynamsoft.com/codepool/img/2020/09/blazor-barcode-result.png)
+    ![blazor barcode sample](https://www.dynamsoft.com/codepool/img/2022/04/blazor-barcode-qrcode-reader.png)
 
 ## Online Demo
 [https://yushulx.me/blazor-barcode-qrcode-reader-scanner/](https://yushulx.me/blazor-barcode-qrcode-reader-scanner/)
