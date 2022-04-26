@@ -1,4 +1,5 @@
 ﻿@page "/barcodereader"
+@inherits BarcodeReaderBase
 @inject IJSRuntime JSRuntime
 
 @if (initialized == false)
@@ -7,6 +8,15 @@
 }
 else
 {
+    <select @onchange="onSelectChange">
+        @* <option value="Dynamsoft">Dynamsoft</option>
+        <option value="ZXing">ZXing</option> *@
+        @foreach (var sdk in sdks)
+        {
+            <option value="@sdk">@sdk</option>
+        }
+    </select>
+ 
     <InputFile OnChange="LoadImage" />
     @* <button @onclick="ReadBarcodes">Read Barcodes from Files</button> *@
     <button @onclick="LiveScan">Live Scan</button>
@@ -21,17 +31,30 @@ else
 @code { 
     String result = "";
     Boolean initialized = false;
+    private string[] sdks = new string[] { "Dynamsoft", "ZXing" };
+    private string currentSDK = "Dynamsoft";
+
+    public void onSelectChange(ChangeEventArgs e) {
+        result = "";
+        currentSDK = e.Value.ToString();
+    }
 
     @* https://docs.microsoft.com/en-us/aspnet/core/blazor/images?view=aspnetcore-6.0 *@
     private async Task LoadImage(InputFileChangeEventArgs e)
     {
+        result = "";
+
         var imageFile = e.File;
-        @* var resizedImage = 
-            await imageFile.RequestImageFileAsync("image/jpg", 640, 640); *@
         var jsImageStream = imageFile.OpenReadStream(1024 * 1024 * 20);
         var dotnetImageStream = new DotNetStreamReference(jsImageStream);
-        await JSRuntime.InvokeVoidAsync("jsFunctions.setImageUsingStreaming", 
-            "image", dotnetImageStream);
+        await JSRuntime.InvokeAsync<byte[]>("jsFunctions.setImageUsingStreaming", 
+            "image", dotnetImageStream, currentSDK);
+
+        if (currentSDK == "ZXing") {
+            jsImageStream = imageFile.OpenReadStream(1024 * 1024 * 20);
+            var text = await GetBarcodeFromStreamAsync(jsImageStream);
+            result = currentSDK + ": " + text;
+        }
     }
 
     // https://stackoverflow.com/questions/59084133/calling-an-instance-method-in-a-razor-page-from-javascript
@@ -61,7 +84,7 @@ else
     [JSInvokable]
     public void ReturnBarcodeResultsAsync(String text)
     {
-        result = text;
+        result = currentSDK + ": " +  text;
         StateHasChanged();
     }
 

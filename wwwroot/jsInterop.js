@@ -3,14 +3,14 @@ let dotnetRef = null;
 var wrapper = new DBRWrapper();
 
 window.jsFunctions = {
-    setImageUsingStreaming: async function setImageUsingStreaming(imageElementId, imageStream) {
+    setImageUsingStreaming: async function setImageUsingStreaming(imageElementId, imageStream, currentSDK) {
         const arrayBuffer = await imageStream.arrayBuffer();
         const blob = new Blob([arrayBuffer]);
         const url = URL.createObjectURL(blob);
         document.getElementById(imageElementId).src = url;
         document.getElementById(imageElementId).style.display = 'block';
 
-        if (barcodescanner) {
+        if (barcodescanner && currentSDK == "Dynamsoft") {
             try {
                 let results = await barcodescanner.decode(blob);
                 returnResultsAsString(results);
