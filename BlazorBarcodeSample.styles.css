@@ -1,19 +1,76 @@
-/* /Pages/BarcodeReader.razor.rz.scp.css */
-#imageview[b-uwo74d4y3p] {
+/* /Pages/Index.razor.rz.scp.css */
+.container[b-r766pazhci] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    /* set the height of the container to the height of the viewport */
+}
+
+.btn[b-r766pazhci] {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover[b-r766pazhci] {
+    background-color: #357a38;
+}
+/* /Pages/Reader.razor.rz.scp.css */
+#imageview[b-nrx5wiifj1] {
     position: relative;
     width: 40vw;
 }
 
-#image[b-uwo74d4y3p] {
+#image[b-nrx5wiifj1] {
     position: relative;
     width: 100%;
-    height: 100%; 
-    display: none;
+    height: 100%;
+    display: none
 }
 
-.p-result[b-uwo74d4y3p] {
+#overlay[b-nrx5wiifj1] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.p-result[b-nrx5wiifj1] {
     color: red;
     font-style: italic;
+}
+/* /Pages/Scanner.razor.rz.scp.css */
+#videoview[b-1y7wdb3oha] {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+#videoContainer[b-1y7wdb3oha] {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 1
+}
+
+#overlay[b-1y7wdb3oha] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    object-fit: contain
 }
 /* /Shared/MainLayout.razor.rz.scp.css */
 .page[b-aokxs3jgdo] {
