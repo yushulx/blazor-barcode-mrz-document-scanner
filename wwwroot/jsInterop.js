@@ -116,6 +116,7 @@ function listCameras(deviceInfos) {
         cameraInfo[deviceInfo.deviceId] = deviceInfo;
         videoSelect.appendChild(option);
     }
+    videoSelect.value = '';
 }
 
 function showResults(results) {
@@ -191,7 +192,7 @@ window.jsFunctions = {
 
             let cameras = await scanner.getAllCameras();
             listCameras(cameras);
-            await openCamera();
+            //await openCamera();
             scanner.onFrameRead = results => {
                 showResults(results);
             };
@@ -200,6 +201,8 @@ window.jsFunctions = {
                 updateResolution();
             }
             await scanner.show();
+            let curCamera = await scanner.getCurrentCamera();
+            videoSelect.value = curCamera.deviceId;
 
         } catch (e) {
             console.log(e);
