@@ -1,12 +1,10 @@
-//Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
-
-let reader = null;
 let scanner = null;
 let overlay = null;
 let context = null;
-let dotnetHelper = null;
 let videoSelect = null;
 let cameraInfo = {};
+let cvr = null;
+let cameraEnhancer = null;
 
 function initOverlay(ol) {
     overlay = ol;
@@ -31,18 +29,30 @@ function clearOverlay() {
 
 function drawOverlay(localization, text) {
     if (context) {
+        let points = localization.points;
+
         context.beginPath();
-        context.moveTo(localization.x1, localization.y1);
-        context.lineTo(localization.x2, localization.y2);
-        context.lineTo(localization.x3, localization.y3);
-        context.lineTo(localization.x4, localization.y4);
-        context.lineTo(localization.x1, localization.y1);
+        context.moveTo(points[0].x, points[0].y);
+        context.lineTo(points[1].x, points[1].y);
+        context.lineTo(points[2].x, points[2].y);
+        context.lineTo(points[3].x, points[3].y);
+        context.lineTo(points[0].x, points[0].y);
         context.stroke();
 
         context.font = '18px Verdana';
         context.fillStyle = '#ff0000';
-        let x = [localization.x1, localization.x2, localization.x3, localization.x4];
-        let y = [localization.y1, localization.y2, localization.y3, localization.y4];
+        let x = [
+            points[0].x,
+            points[1].x,
+            points[2].x,
+            points[3].x,
+        ];
+        let y = [
+            points[0].y,
+            points[1].y,
+            points[2].y,
+            points[3].y,
+        ];
         x.sort(function (a, b) {
             return a - b;
         });
@@ -60,21 +70,9 @@ function decodeImage(dotnetRef, url, data) {
     const img = new Image()
     img.onload = () => {
         updateOverlay(img.width, img.height);
-        if (reader) {
-            reader.decode(data).then(function (results) {
-                try {
-                    let localization;
-                    if (results.length > 0) {
-                        for (var i = 0; i < results.length; ++i) {
-                            localization = results[i].localizationResult;
-                            drawOverlay(localization, results[i].barcodeText);
-                        }
-                    }
-
-                } catch (e) {
-                    alert(e);
-                }
-                returnResultsAsString(dotnetRef, results);
+        if (cvr) {
+            cvr.capture(url, 'ReadBarcodes_Balance').then((result) => {
+                showResults(result, dotnetRef);
             });
 
         }
@@ -82,28 +80,10 @@ function decodeImage(dotnetRef, url, data) {
     img.src = url
 }
 
-function returnResultsAsString(dotnetRef, results) {
-    let txts = [];
-    try {
-        for (let i = 0; i < results.length; ++i) {
-            txts.push(results[i].barcodeText);
-        }
-        let barcoderesults = txts.join(', ');
-        if (txts.length == 0) {
-            barcoderesults = 'No barcode found';
-        }
-
-        if (dotnetRef) {
-            dotnetRef.invokeMethodAsync('ReturnBarcodeResultsAsync', barcoderesults);
-        }
-    } catch (e) {
-    }
-}
-
 function updateResolution() {
-    if (scanner) {
-        let resolution = scanner.getResolution();
-        updateOverlay(resolution[0], resolution[1]);
+    if (cameraEnhancer) {
+        let resolution = cameraEnhancer.getResolution();
+        updateOverlay(resolution.width, resolution.height);
     }
 }
 
@@ -119,114 +99,164 @@ function listCameras(deviceInfos) {
     videoSelect.value = '';
 }
 
-function showResults(results) {
+function showResults(result, dotnetRef) {
     clearOverlay();
 
+    console.log(result);
     let txts = [];
     try {
         let localization;
-        if (results.length > 0) {
-            for (var i = 0; i < results.length; ++i) {
-                txts.push(results[i].barcodeText);
-                localization = results[i].localizationResult;
-                drawOverlay(localization, results[i].barcodeText);
+        let items = result.items
+        if (items.length > 0) {
+            for (var i = 0; i < items.length; ++i) {
+
+                if (items[i].type !== Dynamsoft.Core.EnumCapturedResultItemType.CRIT_BARCODE) {
+                    continue;
+                }
+
+                let item = items[i];
+
+                txts.push(item.text);
+                localization = item.location;
+                console.log(localization);
+                drawOverlay(
+                    localization,
+                    item.text
+                );
             }
 
-            if (dotnetHelper) {
-                returnResultsAsString(dotnetHelper, results);
-            }
+
         }
-
     } catch (e) {
         alert(e);
+    }
+
+    let barcoderesults = txts.join(', ');
+    if (txts.length == 0) {
+        barcoderesults = 'No barcode found';
+    }
+
+    if (dotnetRef) {
+        dotnetRef.invokeMethodAsync('ReturnBarcodeResultsAsync', barcoderesults);
     }
 }
 
 async function openCamera() {
     clearOverlay();
     let deviceId = videoSelect.value;
-    if (scanner) {
-        await scanner.setCurrentCamera(cameraInfo[deviceId]);
+    if (cameraEnhancer && deviceId !== "") {
+        await cameraEnhancer.selectCamera(deviceId);
+        await cameraEnhancer.open();
     }
 }
 
-async function initSDK () {
-    if (reader != null) {
+async function initSDK() {
+    if (cvr != null) {
         return true;
     }
-    let result = true;
+
     try {
-        reader = await Dynamsoft.DBR.BarcodeReader.createInstance();
-        await reader.updateRuntimeSettings("balance");
+        cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
     } catch (e) {
         console.log(e);
-        result = false;
+        return false;
     }
-    return result;
+    return true;
+}
+
+async function dispose() {
+    if (cvr) {
+        cvr.dispose();
+        cvr = null;
+    }
+
+    if (cameraEnhancer) {
+        cameraEnhancer.dispose();
+        cameraEnhancer = null;
+    }
 }
 
 window.jsFunctions = {
 
     setLicense: async function setLicense(license) {
         try {
-            Dynamsoft.DBR.BarcodeReader.license = license;
-            return await this.initSDK();
+            Dynamsoft.Core.CoreModule.engineResourcePaths = {
+                std: "https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-std@1.2.10/dist/",
+                dip: "https://cdn.jsdelivr.net/npm/dynamsoft-image-processing@2.2.30/dist/",
+                core: "https://cdn.jsdelivr.net/npm/dynamsoft-core@3.2.30/dist/",
+                license: "https://cdn.jsdelivr.net/npm/dynamsoft-license@3.2.21/dist/",
+                cvr: "https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-router@2.2.30/dist/",
+                dce: "https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@4.0.3/dist/",
+                dbr: "https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader@10.2.10/dist/",
+                dlr: "https://cdn.jsdelivr.net/npm/dynamsoft-label-recognizer@3.2.30/dist/",
+                dcp: "https://cdn.jsdelivr.net/npm/dynamsoft-code-parser@2.2.10/dist/",
+                ddn: "https://cdn.jsdelivr.net/npm/dynamsoft-document-normalizer@2.2.10/dist/",
+            };
+            Dynamsoft.Core.CoreModule.loadWasm(["dbr"]);
+            Dynamsoft.License.LicenseManager.initLicense(license, true);
+            await initSDK();
         } catch (e) {
             console.log(e);
             return false;
         }
-    },
-    setImageUsingStreaming: async function setImageUsingStreaming(dotnetRef, overlayId, imageId, imageStream) {
-        const arrayBuffer = await imageStream.arrayBuffer();
-        const blob = new Blob([arrayBuffer]);
-        const url = URL.createObjectURL(blob);
-        document.getElementById(imageId).src = url;
-        document.getElementById(imageId).style.display = 'block';
-        initOverlay(document.getElementById(overlayId));
-        if (reader) {
-            reader.maxCvsSideLength = 9999
-            decodeImage(dotnetRef, url, blob);
-        }
 
+        return true;
     },
-    initSDK: async function () {
-        if (reader != null) {
-            return true;
-        }
-        let result = true;
+    initReader: async function () {
         try {
-            reader = await Dynamsoft.DBR.BarcodeReader.createInstance();
-            await reader.updateRuntimeSettings("balance");
+            dispose();
+            cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
+
         } catch (e) {
             console.log(e);
-            result = false;
         }
-        return result;
     },
-    initScanner: async function(dotnetRef, videoId, selectId, overlayId) {
+    initScanner: async function (dotnetRef, videoId, selectId, overlayId) {
         let canvas = document.getElementById(overlayId);
         initOverlay(canvas);
         videoSelect = document.getElementById(selectId);
         videoSelect.onchange = openCamera;
-        dotnetHelper = dotnetRef;
 
         try {
-            scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
-            await scanner.setUIElement(document.getElementById(videoId));
-            await scanner.updateRuntimeSettings("speed");
+            dispose();
 
-            let cameras = await scanner.getAllCameras();
+            let cameraView = await Dynamsoft.DCE.CameraView.createInstance();
+            cameraEnhancer = await Dynamsoft.DCE.CameraEnhancer.createInstance(cameraView);
+
+            let uiElement = document.getElementById(videoId);
+            uiElement.append(cameraView.getUIElement());
+
+            cameraView.getUIElement().shadowRoot?.querySelector('.dce-sel-camera')?.setAttribute('style', 'display: none');
+            cameraView.getUIElement().shadowRoot?.querySelector('.dce-sel-resolution')?.setAttribute('style', 'display: none');
+
+            let cameras = await cameraEnhancer.getAllCameras();
             listCameras(cameras);
-            //await openCamera();
-            scanner.onFrameRead = results => {
-                showResults(results);
-            };
-            scanner.onUnduplicatedRead = (txt, result) => { };
-            scanner.onPlayed = function () {
+
+            cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
+            cvr.setInput(cameraEnhancer);
+
+            cvr.addResultReceiver({
+                onCapturedResultReceived: (result) => {
+                    showResults(result, dotnetRef);
+                },
+            });
+
+            cvr.addResultReceiver({
+                onDecodedBarcodesReceived: (result) => {
+                    if (!result.barcodeResultItems.length) return;
+
+                    console.log(result);
+                },
+            });
+
+            cameraEnhancer.on('played', () => {
                 updateResolution();
-            }
-            await scanner.show();
-            let curCamera = await scanner.getCurrentCamera();
+            });
+
+            openCamera();
+            cvr.startCapturing('ReadSingleBarcode');
+
+            let curCamera = await cameraEnhancer.getSelectedCamera();
             videoSelect.value = curCamera.deviceId;
 
         } catch (e) {
@@ -236,8 +266,12 @@ window.jsFunctions = {
         return true;
     },
     selectFile: async function (dotnetRef, overlayId, imageId) {
+        if (cameraEnhancer) {
+            cameraEnhancer.dispose();
+            cameraEnhancer = null;
+        }
         initOverlay(document.getElementById(overlayId));
-        if (reader) {
+        if (cvr) {
             let input = document.createElement("input");
             input.type = "file";
             input.onchange = async function () {
@@ -247,6 +281,8 @@ window.jsFunctions = {
                     fr.onload = function () {
                         let image = document.getElementById(imageId);
                         image.src = fr.result;
+                        image.style.display = 'block';
+
                         decodeImage(dotnetRef, fr.result, file);
                     }
                     fr.readAsDataURL(file);
@@ -260,6 +296,6 @@ window.jsFunctions = {
         } else {
             alert("The barcode reader is still initializing.");
         }
-    },
+    }
 };
 
