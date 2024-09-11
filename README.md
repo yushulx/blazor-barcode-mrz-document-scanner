@@ -1,11 +1,11 @@
-# Blazor Barcode and QR Code Reader
-The sample shows how to implement a web barcode and QR code reader app by using [Dynamsoft JavaScript Barcode SDK](https://www.dynamsoft.com/Products/barcode-recognition-javascript.aspx) and [Blazor WebAssembly](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor).
+# Blazor Examples for Barcode, MRZ and Document Scanning
+This project demonstrates how to utilize the Dynamsoft Capture Vision SDK for detecting 1D/2D barcodes, documents, MRZ (Machine Readable Zone), and more in Blazor applications.
 
 ## Usage
-1. Get a trial license from [Dynamsoft portal](https://www.dynamsoft.com/customer/license/trialLicense?product=dbr) and then update the following line in `wwwroot/jsInterop.js`:
+1. Get a [trial license](https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform) and then update the following line in `Pages/Home.rzor`:
   
-    ```js
-    Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
+    ```csharp
+    private string LicenseKey = "LICENSE KEY";
     ```
     
 2. Run the app:
@@ -21,7 +21,7 @@ The sample shows how to implement a web barcode and QR code reader app by using 
     ![blazor barcode sample](https://www.dynamsoft.com/codepool/img/2023/04/dotnet-maui-blazor-barcode-reader.png)
 
 ## Online Demo
-[https://yushulx.me/blazor-barcode-qrcode-reader-scanner/](https://yushulx.me/blazor-barcode-qrcode-reader-scanner/)
+[https://github.com/yushulx/blazor-barcode-mrz-document-scanner](https://github.com/yushulx/blazor-barcode-mrz-document-scanner)
 
 ## Blog
 [How to Build Web Barcode Reader with Blazor WebAssembly](https://www.dynamsoft.com/codepool/web-barcode-reader-blazor-webassembly.html)
