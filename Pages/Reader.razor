@@ -1,8 +1,7 @@
 ﻿@page "/barcodereader"
 @inject IJSRuntime JSRuntime
 
-<InputFile OnChange="LoadImage" />
-@*<button @onclick="ReadBarcodes">HTML Input</button>*@
+<button @onclick="ReadBarcodes">Select an image</button>
 <p class="p-result">@result</p>
 
 <div id="imageview">
@@ -14,21 +13,18 @@
     String result = "";
     private DotNetObjectReference<Reader> objRef;
 
-    @* https://docs.microsoft.com/en-us/aspnet/core/blazor/images?view=aspnetcore-6.0 *@
-    private async Task LoadImage(InputFileChangeEventArgs e)
-    {
-        result = "";
-
-        var imageFile = e.File;
-        var jsImageStream = imageFile.OpenReadStream(1024 * 1024 * 20);
-        var dotnetImageStream = new DotNetStreamReference(jsImageStream);
-        await JSRuntime.InvokeAsync<byte[]>("jsFunctions.setImageUsingStreaming", objRef, "overlay",
-        "image", dotnetImageStream);
-    }
-
     protected override void OnInitialized()
     {
         objRef = DotNetObjectReference.Create(this);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Call the JavaScript function when the page is loaded
+            await JSRuntime.InvokeVoidAsync("jsFunctions.initReader");
+        }
     }
 
 
