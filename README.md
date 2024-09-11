@@ -21,7 +21,7 @@ This project demonstrates how to utilize the Dynamsoft Capture Vision SDK for de
     ![blazor barcode sample](https://www.dynamsoft.com/codepool/img/2023/04/dotnet-maui-blazor-barcode-reader.png)
 
 ## Online Demo
-[https://github.com/yushulx/blazor-barcode-mrz-document-scanner](https://github.com/yushulx/blazor-barcode-mrz-document-scanner)
+[https://yushulx.me/blazor-barcode-mrz-document-scanner/](https://yushulx.me/blazor-barcode-mrz-document-scanner/)
 
 ## Blog
 [How to Build Web Barcode Reader with Blazor WebAssembly](https://www.dynamsoft.com/codepool/web-barcode-reader-blazor-webassembly.html)
