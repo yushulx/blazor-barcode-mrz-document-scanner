@@ -1,0 +1,44 @@
+﻿@page "/"
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Home</PageTitle>
+
+<p>Click <a href="https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform" target="_blank">here</a> to obtain a Dynamsoft Capture Vision Trial License.</p>
+
+<EditForm Model="@this">
+    <InputText @bind-Value="LicenseKey" placeholder="Enter your license key" />
+    <button type="button" class="btn btn-primary" @onclick="SetLicenseKey">Activate the SDK</button>
+</EditForm>
+
+@code {
+    Boolean initialized = false;
+
+    private string LicenseKey = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
+
+    private async Task SetLicenseKey()
+    {
+        initialized = await JSRuntime.InvokeAsync<Boolean>("jsFunctions.setLicense", LicenseKey);
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        // Init();
+    }
+
+    // public async void Init()
+    // {
+    //     initialized = await JSRuntime.InvokeAsync<Boolean>("jsFunctions.initSDK");
+    //     StateHasChanged();
+    // }
+
+    // public void StartReader()
+    // {
+    //     NavigationManager.NavigateTo("barcodereader");
+    // }
+
+    // public void StartScanner()
+    // {
+    //     NavigationManager.NavigateTo("barcodescanner");
+    // }
+}

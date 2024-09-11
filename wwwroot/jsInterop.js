@@ -1,4 +1,4 @@
-Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
+//Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
 
 let reader = null;
 let scanner = null;
@@ -150,7 +150,32 @@ async function openCamera() {
     }
 }
 
+async function initSDK () {
+    if (reader != null) {
+        return true;
+    }
+    let result = true;
+    try {
+        reader = await Dynamsoft.DBR.BarcodeReader.createInstance();
+        await reader.updateRuntimeSettings("balance");
+    } catch (e) {
+        console.log(e);
+        result = false;
+    }
+    return result;
+}
+
 window.jsFunctions = {
+
+    setLicense: async function setLicense(license) {
+        try {
+            Dynamsoft.DBR.BarcodeReader.license = license;
+            return await this.initSDK();
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    },
     setImageUsingStreaming: async function setImageUsingStreaming(dotnetRef, overlayId, imageId, imageStream) {
         const arrayBuffer = await imageStream.arrayBuffer();
         const blob = new Blob([arrayBuffer]);
