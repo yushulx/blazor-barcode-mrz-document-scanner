@@ -1,8 +1,8 @@
 # Blazor Examples for Barcode, MRZ and Document Scanning
-This project demonstrates how to utilize the Dynamsoft Capture Vision SDK for detecting 1D/2D barcodes, documents, MRZ (Machine Readable Zone), and more in Blazor applications.
+This project demonstrates how to utilize the Dynamsoft Capture Vision SDK for detecting **1D/2D barcodes**, **documents**, **MRZ (Machine Readable Zone)**, and more in Blazor applications.
 
 ## Demo Video
-- Barcode Scanner
+- **Barcode Reader and Scanner**
 
   https://github.com/user-attachments/assets/5f32ed5f-76b9-4798-9ff9-a9fea21592e5
 
