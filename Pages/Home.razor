@@ -20,25 +20,4 @@
         initialized = await JSRuntime.InvokeAsync<Boolean>("jsFunctions.setLicense", LicenseKey);
         StateHasChanged();
     }
-
-    protected override void OnInitialized()
-    {
-        // Init();
-    }
-
-    // public async void Init()
-    // {
-    //     initialized = await JSRuntime.InvokeAsync<Boolean>("jsFunctions.initSDK");
-    //     StateHasChanged();
-    // }
-
-    // public void StartReader()
-    // {
-    //     NavigationManager.NavigateTo("barcodereader");
-    // }
-
-    // public void StartScanner()
-    // {
-    //     NavigationManager.NavigateTo("barcodescanner");
-    // }
 }

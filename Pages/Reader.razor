@@ -5,13 +5,15 @@
 <p class="p-result">@result</p>
 
 <div id="imageview">
-    <img id="image" />
-    <canvas id="overlay"></canvas>
+    <img id="@imageId" />
+    <canvas id="@overlayId"></canvas>
 </div>
 
 @code {
-    String result = "";
-    private DotNetObjectReference<Reader> objRef;
+    private String result = "";
+    private DotNetObjectReference<Reader>? objRef;
+    private String imageId = "image";
+    private String overlayId = "overlay";
 
     protected override void OnInitialized()
     {
@@ -31,7 +33,7 @@
     public async Task ReadBarcodes()
     {
         await JSRuntime.InvokeVoidAsync(
-        "jsFunctions.selectFile", objRef, "overlay", "image");
+        "jsFunctions.selectFile", objRef, overlayId, imageId);
     }
 
     [JSInvokable]
