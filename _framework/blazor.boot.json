@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "BlazorCaptureVision",
   "resources": {
-    "hash": "sha256-ykH1Xu0nxIfnRygsM/wwNabiDWaAht79P3e+xbn2Gek=",
+    "hash": "sha256-ifJD9z20bDqEDl8HIcyWAJ2vzLbSPYACQUV2rtv7OD0=",
     "jsModuleNative": {
       "dotnet.native.8.0.8.746giovk6l.js": "sha256-juC5sA7gHTLXFEhAKgdM2/RavswpwCtDfjYGsAz2FXg="
     },
@@ -17,7 +17,7 @@
       "icudt_no_CJK.dat": "sha256-L7sV7NEYP37/Qr2FPCePo5cJqRgTXRwGHuwF5Q+0Nfs="
     },
     "assembly": {
-      "BlazorCaptureVision.wasm": "sha256-V4ddPearJk+O8xqhVr2J/OOJtvAoandinXTtxCtDb0Y=",
+      "BlazorCaptureVision.wasm": "sha256-BBt5yxcwCSGQNdpORSoRC99/tv//mC/L73K7l0tOyQI=",
       "Microsoft.AspNetCore.Components.Forms.wasm": "sha256-Yae51BHupDzyWHnQ9t2wEFrUooSHK/fsVZxwvfDTHhg=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-2xlLr5dcnn5U4UI/LPnCBTCLrTH7wTtjVRdpEwcS+VM=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-FApy1bBDigbkP2QtAehKL0Ehd26E+6w2nl3G2c2tQXo=",
