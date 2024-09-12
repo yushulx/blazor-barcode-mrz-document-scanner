@@ -21,7 +21,7 @@ This project demonstrates how to utilize the Dynamsoft Capture Vision SDK for de
     dotnet run
     ```
     
-    ![blazor barcode sample](https://www.dynamsoft.com/codepool/img/2023/04/dotnet-maui-blazor-barcode-reader.png)
+    ![blazor barcode reader and scanner](https://www.dynamsoft.com/codepool/img/2024/09/dotnet-blazor-barcode-qrcode-scanner.png)
 
 ## Online Demo
 [https://yushulx.me/blazor-barcode-mrz-document-scanner/](https://yushulx.me/blazor-barcode-mrz-document-scanner/)
