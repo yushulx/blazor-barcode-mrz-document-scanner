@@ -96,13 +96,12 @@ function listCameras(deviceInfos) {
         cameraInfo[deviceInfo.deviceId] = deviceInfo;
         videoSelect.appendChild(option);
     }
-    videoSelect.value = '';
+/*    videoSelect.value = '';*/
 }
 
 function showResults(result, dotnetRef) {
     clearOverlay();
 
-    console.log(result);
     let txts = [];
     try {
         let localization;
@@ -118,7 +117,7 @@ function showResults(result, dotnetRef) {
 
                 txts.push(item.text);
                 localization = item.location;
-                console.log(localization);
+
                 drawOverlay(
                     localization,
                     item.text
@@ -143,10 +142,17 @@ function showResults(result, dotnetRef) {
 
 async function openCamera() {
     clearOverlay();
-    let deviceId = videoSelect.value;
-    if (cameraEnhancer && deviceId !== "") {
-        await cameraEnhancer.selectCamera(deviceId);
-        await cameraEnhancer.open();
+
+    try {
+        let deviceId = videoSelect.value;
+        if (cameraEnhancer && deviceId !== "") {
+            await cameraEnhancer.selectCamera(deviceId);
+            await cameraEnhancer.open();
+            cvr.startCapturing('ReadSingleBarcode');
+        }
+    }
+    catch(e) {
+        console.log(e);
     }
 }
 
@@ -229,8 +235,7 @@ window.jsFunctions = {
             cameraView.getUIElement().shadowRoot?.querySelector('.dce-sel-camera')?.setAttribute('style', 'display: none');
             cameraView.getUIElement().shadowRoot?.querySelector('.dce-sel-resolution')?.setAttribute('style', 'display: none');
 
-            let cameras = await cameraEnhancer.getAllCameras();
-            listCameras(cameras);
+            
 
             cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
             cvr.setInput(cameraEnhancer);
@@ -245,7 +250,6 @@ window.jsFunctions = {
                 onDecodedBarcodesReceived: (result) => {
                     if (!result.barcodeResultItems.length) return;
 
-                    console.log(result);
                 },
             });
 
@@ -253,11 +257,11 @@ window.jsFunctions = {
                 updateResolution();
             });
 
-            openCamera();
-            cvr.startCapturing('ReadSingleBarcode');
+            
+            
 
-            let curCamera = await cameraEnhancer.getSelectedCamera();
-            videoSelect.value = curCamera.deviceId;
+            //let curCamera = await cameraEnhancer.getSelectedCamera();
+            //videoSelect.value = curCamera.deviceId;
 
         } catch (e) {
             console.log(e);
@@ -295,6 +299,25 @@ window.jsFunctions = {
             input.click();
         } else {
             alert("The barcode reader is still initializing.");
+        }
+    },
+    getCameras: async function () {
+        if (cameraEnhancer) {
+            let cameras = await cameraEnhancer.getAllCameras();
+            listCameras(cameras);
+        }
+    },
+    startCamera: async function() {
+        openCamera();
+    },
+    stopCamera: async function () {
+        try {
+            if (cameraEnhancer) {
+                cameraEnhancer.pause();
+            }
+        }
+        catch (e) {
+            console.log(e);
         }
     }
 };

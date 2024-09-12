@@ -3,23 +3,29 @@
 @inject IJSRuntime JSRuntime
 
 <div class="select">
-    <label for="videoSource">Video source: </label>
-    <select id="videoSource"></select>
+    <button @onclick="GetCameras">Get Cameras</button>
+    <label for="videoSource"></label>
+    <select id="@videoSourceId"></select>
+    <button @onclick="StartCamera">Open Camera</button>
+    <button @onclick="StopCamera">Stop Camera</button>
 </div>
 
 <div id="videoview">
-    <div class="dce-video-container" id="videoContainer"></div>
-    <canvas id="overlay"></canvas>
+    <div class="dce-video-container" id="@videoContainerId"></div>
+    <canvas id="@overlayId"></canvas>
 </div>
 
 @code {
-    String result = "";
-    private DotNetObjectReference<Scanner> objRef;
+    private String result = "";
+    private DotNetObjectReference<Scanner>? objRef;
+    private string videoSourceId = "videoSource";
+    private string overlayId = "overlay";
+    private string videoContainerId = "videoContainer";
 
     protected override void OnInitialized()
     {
         //objRef = DotNetObjectReference.Create(this);
-        
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -27,7 +33,7 @@
         if (firstRender)
         {
             objRef = DotNetObjectReference.Create(this);
-            await JSRuntime.InvokeAsync<Boolean>("jsFunctions.initScanner", objRef, "videoContainer", "videoSource", "overlay");
+            await JSRuntime.InvokeAsync<Boolean>("jsFunctions.initScanner", objRef, videoContainerId, videoSourceId, overlayId);
         }
     }
 
@@ -42,5 +48,20 @@
     public void Dispose()
     {
         objRef?.Dispose();
+    }
+
+    public async Task GetCameras()
+    {
+        await JSRuntime.InvokeVoidAsync("jsFunctions.getCameras");
+    }
+
+    public async Task StartCamera()
+    {
+        await JSRuntime.InvokeVoidAsync("jsFunctions.startCamera");
+    }
+
+    public async Task StopCamera()
+    {
+        await JSRuntime.InvokeVoidAsync("jsFunctions.stopCamera");
     }
 }
