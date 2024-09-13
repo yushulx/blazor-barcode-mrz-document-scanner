@@ -1,0 +1,25 @@
+﻿@page "/documentviewer"
+@inject IJSRuntime JSRuntime
+
+@if (isLoading)
+{
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="spinner"></div>
+    </div>
+}
+
+<div id="@containerId" class="container"></div>
+
+@code {
+    private Boolean isLoading = true;
+    private String containerId = "document_viewer";
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("jsFunctions.initDocumentViewer", containerId);
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

@@ -1,6 +1,13 @@
 ﻿@page "/barcodereader"
 @inject IJSRuntime JSRuntime
 
+@if (isLoading)
+{
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="spinner"></div>
+    </div>
+}
+
 <button @onclick="ReadBarcodes">Select an image</button>
 <p class="p-result">@result</p>
 
@@ -10,6 +17,7 @@
 </div>
 
 @code {
+    private Boolean isLoading = true;
     private String result = "";
     private DotNetObjectReference<Reader>? objRef;
     private String imageId = "image";
@@ -24,8 +32,9 @@
     {
         if (firstRender)
         {
-            // Call the JavaScript function when the page is loaded
             await JSRuntime.InvokeVoidAsync("jsFunctions.initReader");
+            isLoading = false;
+            StateHasChanged();
         }
     }
 

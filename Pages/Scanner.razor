@@ -1,6 +1,13 @@
 @page "/barcodescanner"
-
 @inject IJSRuntime JSRuntime
+
+
+@if (isLoading)
+{
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="spinner"></div>
+    </div>
+}
 
 <div class="select">
     <button @onclick="GetCameras">Get Cameras</button>
@@ -16,6 +23,7 @@
 </div>
 
 @code {
+    private Boolean isLoading = true;
     private String result = "";
     private DotNetObjectReference<Scanner>? objRef;
     private string videoSourceId = "videoSource";
@@ -33,7 +41,9 @@
         if (firstRender)
         {
             objRef = DotNetObjectReference.Create(this);
-            await JSRuntime.InvokeAsync<Boolean>("jsFunctions.initScanner", objRef, videoContainerId, videoSourceId, overlayId);
+            await JSRuntime.InvokeVoidAsync("jsFunctions.initScanner", objRef, videoContainerId, videoSourceId, overlayId);
+            isLoading = false;
+            StateHasChanged();
         }
     }
 

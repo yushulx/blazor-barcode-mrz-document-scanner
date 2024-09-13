@@ -1,4 +1,14 @@
-let scanner = null;
+import { isMobile, initDocDetectModule } from "./utils.js";
+import {
+    mobileCaptureViewerUiConfig,
+    mobilePerspectiveUiConfig,
+    mobileEditViewerUiConfig,
+    pcCaptureViewerUiConfig,
+    pcPerspectiveUiConfig,
+    pcEditViewerUiConfig
+} from "./uiConfig.js";
+
+let isInitialized = false;
 let overlay = null;
 let context = null;
 let videoSelect = null;
@@ -96,7 +106,6 @@ function listCameras(deviceInfos) {
         cameraInfo[deviceInfo.deviceId] = deviceInfo;
         videoSelect.appendChild(option);
     }
-/*    videoSelect.value = '';*/
 }
 
 function showResults(result, dotnetRef) {
@@ -152,22 +161,8 @@ async function openCamera() {
         }
     }
     catch(e) {
-        console.log(e);
+        alert(e);
     }
-}
-
-async function initSDK() {
-    if (cvr != null) {
-        return true;
-    }
-
-    try {
-        cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
-    } catch (e) {
-        console.log(e);
-        return false;
-    }
-    return true;
 }
 
 async function dispose() {
@@ -185,6 +180,8 @@ async function dispose() {
 window.jsFunctions = {
 
     setLicense: async function setLicense(license) {
+        if (isInitialized) return true;
+
         try {
             Dynamsoft.Core.CoreModule.engineResourcePaths = {
                 std: "https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-std@1.2.10/dist/",
@@ -197,27 +194,45 @@ window.jsFunctions = {
                 dlr: "https://cdn.jsdelivr.net/npm/dynamsoft-label-recognizer@3.2.30/dist/",
                 dcp: "https://cdn.jsdelivr.net/npm/dynamsoft-code-parser@2.2.10/dist/",
                 ddn: "https://cdn.jsdelivr.net/npm/dynamsoft-document-normalizer@2.2.10/dist/",
+                dnn: "https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-dnn@1.0.20/dist/"
             };
-            Dynamsoft.Core.CoreModule.loadWasm(["dbr"]);
+            Dynamsoft.DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/engine";
+            
             Dynamsoft.License.LicenseManager.initLicense(license, true);
-            await initSDK();
+
+            await Dynamsoft.Core.CoreModule.loadWasm(["DIP"]);
+            await Dynamsoft.Core.CoreModule.loadWasm(["DBR", "DDN", "DLR"]);
+
+            cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
+            Dynamsoft.DDV.setProcessingHandler("imageFilter", new Dynamsoft.DDV.ImageFilter());
+            await Dynamsoft.DDV.Core.init();
+
+            isInitialized = true;
         } catch (e) {
-            console.log(e);
+            alert(e);
             return false;
         }
 
         return true;
     },
     initReader: async function () {
+        if (!isInitialized) {
+            alert("Please set the license first.");
+            return;
+        }
         try {
             dispose();
             cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
 
         } catch (e) {
-            console.log(e);
+            alert(e);
         }
     },
     initScanner: async function (dotnetRef, videoId, selectId, overlayId) {
+        if (!isInitialized) {
+            alert("Please set the license first.");
+            return;
+        }
         let canvas = document.getElementById(overlayId);
         initOverlay(canvas);
         videoSelect = document.getElementById(selectId);
@@ -257,14 +272,9 @@ window.jsFunctions = {
                 updateResolution();
             });
 
-            
-            
-
-            //let curCamera = await cameraEnhancer.getSelectedCamera();
-            //videoSelect.value = curCamera.deviceId;
-
+         
         } catch (e) {
-            console.log(e);
+            alert(e);
             result = false;
         }
         return true;
@@ -317,7 +327,89 @@ window.jsFunctions = {
             }
         }
         catch (e) {
-            console.log(e);
+            alert(e);
+        }
+    },
+    initDocumentViewer: async function (containerId) {
+        if (!isInitialized) {
+            alert("Please set the license first.");
+            return;
+        }
+        try {
+            let config = Dynamsoft.DDV.getDefaultUiConfig("editViewer", { includeAnnotationSet: true });
+            let editViewer = new Dynamsoft.DDV.EditViewer({
+                container: containerId,
+                uiConfig: config,
+            });
+        }
+        catch (e) {
+            alert(e);
+        }
+    },
+    initDocumentScanner: async function (containerId) {
+        if (!isInitialized) {
+            alert("Please set the license first.");
+            return;
+        }
+
+        try {
+            await initDocDetectModule(Dynamsoft.DDV, Dynamsoft.CVR);
+
+            const captureViewer = new Dynamsoft.DDV.CaptureViewer({
+                container: containerId,
+                uiConfig: isMobile() ? mobileCaptureViewerUiConfig : pcCaptureViewerUiConfig,
+                viewerConfig: {
+                    acceptedPolygonConfidence: 60,
+                    enableAutoDetect: true,
+                }
+            });
+
+            await captureViewer.play({ resolution: [1920, 1080] });
+
+            captureViewer.on("showPerspectiveViewer", () => switchViewer(0, 1, 0));
+            
+            const perspectiveViewer = new Dynamsoft.DDV.PerspectiveViewer({
+                container: containerId,
+                groupUid: captureViewer.groupUid,
+                uiConfig: isMobile() ? mobilePerspectiveUiConfig : pcPerspectiveUiConfig,
+                viewerConfig: { scrollToLatest: true }
+            });
+
+            perspectiveViewer.hide();
+            perspectiveViewer.on("backToCaptureViewer", () => {
+                switchViewer(1, 0, 0);
+                captureViewer.play();
+            });
+
+            perspectiveViewer.on("showEditViewer", () => switchViewer(0, 0, 1));
+
+            const editViewer = new Dynamsoft.DDV.EditViewer({
+                container: containerId,
+                groupUid: captureViewer.groupUid,
+                uiConfig: isMobile() ? mobileEditViewerUiConfig : pcEditViewerUiConfig
+            });
+
+            editViewer.hide();
+            editViewer.on("backToPerspectiveViewer", () => switchViewer(0, 1, 0));
+
+            const switchViewer = (c, p, e) => {
+                captureViewer.hide();
+                perspectiveViewer.hide();
+                editViewer.hide();
+                if (c) captureViewer.show();
+                else captureViewer.stop();
+                if (p) perspectiveViewer.show();
+                if (e) editViewer.show();
+            };
+            
+        }
+        catch (e) {
+            console.log({
+                container: containerId,
+                uiConfig: isMobile() ? mobilePerspectiveUiConfig : pcPerspectiveUiConfig,
+                viewerConfig: { scrollToLatest: true }
+            });
+            alert(e);
         }
     }
 };

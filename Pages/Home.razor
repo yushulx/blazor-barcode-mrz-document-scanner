@@ -10,14 +10,24 @@
     <button type="button" class="btn btn-primary" @onclick="SetLicenseKey">Activate the SDK</button>
 </EditForm>
 
+@if (isLoading)
+{
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="spinner"></div>
+    </div>
+}
+
 @code {
+    private Boolean isLoading = false;
     Boolean initialized = false;
 
     private string LicenseKey = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
 
     private async Task SetLicenseKey()
     {
+        isLoading = true;
         initialized = await JSRuntime.InvokeAsync<Boolean>("jsFunctions.setLicense", LicenseKey);
+        isLoading = false;
         StateHasChanged();
     }
 }
