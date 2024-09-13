@@ -160,6 +160,16 @@ main[b-ebumwtjcy7] {
         overflow-y: auto;
     }
 }
+/* /Pages/DocumentScanner.razor.rz.scp.css */
+.container[b-w6j2jpllye] {
+    /*width: 88vw;*/
+    height: 80vh;
+}
+/* /Pages/DocumentViewer.razor.rz.scp.css */
+.container[b-opk2qqo6nu] {
+    /*width: 88vw;*/
+    height: 80vh;
+}
 /* /Pages/Reader.razor.rz.scp.css */
 #imageview[b-j1rhuzxx3i] {
     position: relative;
