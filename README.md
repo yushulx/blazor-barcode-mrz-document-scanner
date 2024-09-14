@@ -31,4 +31,5 @@ This project demonstrates how to utilize the Dynamsoft Capture Vision SDK for de
 [https://yushulx.me/blazor-barcode-mrz-document-scanner/](https://yushulx.me/blazor-barcode-mrz-document-scanner/)
 
 ## Blog
-[How to Build Web Barcode Reader with Blazor WebAssembly](https://www.dynamsoft.com/codepool/web-barcode-reader-blazor-webassembly.html)
+- [How to Build a .NET Blazor Application for Scanning Barcode and QR Code](https://www.dynamsoft.com/codepool/dotnet-blazor-barcode-qr-reader-scanner.html)
+- [How to Create a Blazor Web App for Document PDF Viewing and Annotation](https://www.dynamsoft.com/codepool/blazor-document-pdf-annotation-viewer.html)
