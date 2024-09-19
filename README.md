@@ -10,6 +10,10 @@ This project demonstrates how to utilize the Dynamsoft Capture Vision SDK for de
  
   https://github.com/user-attachments/assets/fff11fae-4a5a-432c-9bfc-22b1389b0156
 
+- **MRZ Reader and Scanner**
+
+  https://github.com/user-attachments/assets/c77574d2-e798-4bc8-95e5-2b4838c575f4
+
 
 
 ## Usage
