@@ -1,4 +1,4 @@
-﻿@page "/barcodereader"
+﻿@page "/mrzreader"
 @inject IJSRuntime JSRuntime
 
 @if (isLoading)
@@ -8,47 +8,47 @@
     </div>
 }
 
-<button @onclick="ReadBarcodes">Select an image</button>
-<p class="p-result">@result</p>
+<button @onclick="ReadMrz">Select an image</button>
 
 <div id="imageview">
     <img id="@imageId" />
     <canvas id="@overlayId"></canvas>
+
+</div>
+
+<div>
+    <textarea @bind="result"></textarea>
 </div>
 
 @code {
     private Boolean isLoading = true;
-    private String result = "";
-    private DotNetObjectReference<Reader>? objRef;
+    private string result = string.Empty;
+    private DotNetObjectReference<MrzReader>? objRef;
     private String imageId = "image";
     private String overlayId = "overlay";
-
-    protected override void OnInitialized()
-    {
-        objRef = DotNetObjectReference.Create(this);
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("jsFunctions.initReader");
+            objRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("jsFunctions.initMrzReader", objRef);
             isLoading = false;
             StateHasChanged();
         }
     }
 
 
-    public async Task ReadBarcodes()
+    public async Task ReadMrz()
     {
         await JSRuntime.InvokeVoidAsync(
-        "jsFunctions.selectFile", objRef, overlayId, imageId);
+        "jsFunctions.selectFile", objRef, overlayId, imageId, VisionTypes.MRZ);
     }
 
     [JSInvokable]
-    public void ReturnBarcodeResultsAsync(String text)
+    public void ReturnMrzResultsAsync(string results)
     {
-        result = text;
+        result = results;
         StateHasChanged();
     }
 
@@ -57,3 +57,4 @@
         objRef?.Dispose();
     }
 }
+

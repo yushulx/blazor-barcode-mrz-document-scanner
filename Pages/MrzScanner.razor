@@ -1,0 +1,74 @@
+﻿@page "/mrzscanner"
+@inject IJSRuntime JSRuntime
+
+@if (isLoading)
+{
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="spinner"></div>
+    </div>
+}
+
+<div class="select">
+    <button @onclick="GetCameras">Get Cameras</button>
+    <label for="videoSource"></label>
+    <select id="@videoSourceId"></select>
+    <button @onclick="StartCamera">Open Camera</button>
+    <button @onclick="StopCamera">Stop Camera</button>
+</div>
+
+<div id="videoview">
+    <div class="dce-video-container" id="@videoContainerId"></div>
+    <canvas id="@overlayId"></canvas>
+</div>
+
+<div>
+    <textarea @bind="result"></textarea>
+</div>
+
+@code {
+    private Boolean isLoading = true;
+    private string result = string.Empty;
+    private DotNetObjectReference<MrzScanner>? objRef;
+    private string videoSourceId = "videoSource";
+    private string overlayId = "overlay";
+    private string videoContainerId = "videoContainer";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("jsFunctions.initMrzScanner", objRef, videoContainerId, videoSourceId, overlayId);
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+
+    [JSInvokable]
+    public void ReturnMrzResultsAsync(string results)
+    {
+        result = results;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
+    }
+
+    public async Task GetCameras()
+    {
+        await JSRuntime.InvokeVoidAsync("jsFunctions.getCameras");
+    }
+
+    public async Task StartCamera()
+    {
+        await JSRuntime.InvokeVoidAsync("jsFunctions.startCamera");
+    }
+
+    public async Task StopCamera()
+    {
+        await JSRuntime.InvokeVoidAsync("jsFunctions.stopCamera");
+    }
+}

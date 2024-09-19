@@ -1,0 +1,59 @@
+﻿@page "/barcodereader"
+@inject IJSRuntime JSRuntime
+
+@if (isLoading)
+{
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="spinner"></div>
+    </div>
+}
+
+<button @onclick="ReadBarcodes">Select an image</button>
+<p class="p-result">@result</p>
+
+<div id="imageview">
+    <img id="@imageId" />
+    <canvas id="@overlayId"></canvas>
+</div>
+
+@code {
+    private Boolean isLoading = true;
+    private String result = "";
+    private DotNetObjectReference<BarcodeReader>? objRef;
+    private String imageId = "image";
+    private String overlayId = "overlay";
+
+    protected override void OnInitialized()
+    {
+        objRef = DotNetObjectReference.Create(this);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("jsFunctions.initBarcodeReader");
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+
+    public async Task ReadBarcodes()
+    {
+        await JSRuntime.InvokeVoidAsync(
+        "jsFunctions.selectFile", objRef, overlayId, imageId, VisionTypes.BARCODE);
+    }
+
+    [JSInvokable]
+    public void ReturnBarcodeResultsAsync(String text)
+    {
+        result = text;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        objRef?.Dispose();
+    }
+}

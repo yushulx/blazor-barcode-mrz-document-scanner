@@ -25,23 +25,17 @@
 @code {
     private Boolean isLoading = true;
     private String result = "";
-    private DotNetObjectReference<Scanner>? objRef;
+    private DotNetObjectReference<BarcodeScanner>? objRef;
     private string videoSourceId = "videoSource";
     private string overlayId = "overlay";
     private string videoContainerId = "videoContainer";
-
-    protected override void OnInitialized()
-    {
-        //objRef = DotNetObjectReference.Create(this);
-
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             objRef = DotNetObjectReference.Create(this);
-            await JSRuntime.InvokeVoidAsync("jsFunctions.initScanner", objRef, videoContainerId, videoSourceId, overlayId);
+            await JSRuntime.InvokeVoidAsync("jsFunctions.initBarcodeScanner", objRef, videoContainerId, videoSourceId, overlayId);
             isLoading = false;
             StateHasChanged();
         }
