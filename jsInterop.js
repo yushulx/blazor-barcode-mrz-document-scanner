@@ -15,6 +15,8 @@ let videoSelect = null;
 let cameraInfo = {};
 let cvr = null;
 let cameraEnhancer = null;
+let parser = null
+let templateName = '';
 
 function initOverlay(ol) {
     overlay = ol;
@@ -76,14 +78,21 @@ function drawOverlay(localization, text) {
     }
 }
 
-function decodeImage(dotnetRef, url, data) {
+function decodeImage(dotnetRef, url, visionType) {
     const img = new Image()
     img.onload = () => {
         updateOverlay(img.width, img.height);
         if (cvr) {
-            cvr.capture(url, 'ReadBarcodes_Balance').then((result) => {
-                showResults(result, dotnetRef);
-            });
+            if (visionType === 'barcode') {
+                cvr.capture(url, templateName).then((result) => {
+                    showBarcodeResults(result, dotnetRef);
+                });
+            }
+            else if (visionType === 'mrz') {
+                cvr.capture(url, templateName).then((result) => {
+                    showMrzResults(result, dotnetRef);
+                });
+            }
 
         }
     }
@@ -108,7 +117,43 @@ function listCameras(deviceInfos) {
     }
 }
 
-function showResults(result, dotnetRef) {
+async function showMrzResults(result, dotnetRef) {
+    clearOverlay();
+
+    let txts = [];
+    try {
+        let localization;
+        let items = result.items;
+        if (items.length > 0) {
+            for (var i = 0; i < items.length; ++i) {
+
+                if (items[i].type !== Dynamsoft.Core.EnumCapturedResultItemType.CRIT_TEXT_LINE) {
+                    continue;
+                }
+
+                let item = items[i];
+
+                txts.push(item.text);
+                localization = item.location;
+
+                drawOverlay(
+                    localization,
+                    ''
+                );
+
+                let parseResults = await parser.parse(item.text);
+                if (dotnetRef) {
+                    dotnetRef.invokeMethodAsync('ReturnMrzResultsAsync', JSON.stringify(handleMrzParseResult(parseResults)));
+                }
+                break;
+            }
+        }
+    } catch (e) {
+        alert(e);
+    }    
+}
+
+function showBarcodeResults(result, dotnetRef) {
     clearOverlay();
 
     let txts = [];
@@ -157,7 +202,7 @@ async function openCamera() {
         if (cameraEnhancer && deviceId !== "") {
             await cameraEnhancer.selectCamera(deviceId);
             await cameraEnhancer.open();
-            cvr.startCapturing('ReadSingleBarcode');
+            cvr.startCapturing(templateName);
         }
     }
     catch(e) {
@@ -177,6 +222,59 @@ async function dispose() {
     }
 }
 
+function handleMrzParseResult(result) {
+    const parseResultInfo = {};
+    let type = result.getFieldValue("documentCode");
+    parseResultInfo['Document Type'] = JSON.parse(result.jsonString).CodeType;
+    let nation = result.getFieldValue("issuingState");
+    parseResultInfo['Issuing State'] = nation;
+    let surName = result.getFieldValue("primaryIdentifier");
+    parseResultInfo['Surname'] = surName;
+    let givenName = result.getFieldValue("secondaryIdentifier");
+    parseResultInfo['Given Name'] = givenName;
+    let passportNumber = type === "P" ? result.getFieldValue("passportNumber") : result.getFieldValue("documentNumber");
+    parseResultInfo['Passport Number'] = passportNumber;
+    let nationality = result.getFieldValue("nationality");
+    parseResultInfo['Nationality'] = nationality;
+    let gender = result.getFieldValue("sex");
+    parseResultInfo["Gender"] = gender;
+    let birthYear = result.getFieldValue("birthYear");
+    let birthMonth = result.getFieldValue("birthMonth");
+    let birthDay = result.getFieldValue("birthDay");
+    if (parseInt(birthYear) > (new Date().getFullYear() % 100)) {
+        birthYear = "19" + birthYear;
+    } else {
+        birthYear = "20" + birthYear;
+    }
+    parseResultInfo['Date of Birth (YYYY-MM-DD)'] = birthYear + "-" + birthMonth + "-" + birthDay;
+    let expiryYear = result.getFieldValue("expiryYear");
+    let expiryMonth = result.getFieldValue("expiryMonth");
+    let expiryDay = result.getFieldValue("expiryDay");
+    if (parseInt(expiryYear) >= 60) {
+        expiryYear = "19" + expiryYear;
+    } else {
+        expiryYear = "20" + expiryYear;
+    }
+    parseResultInfo["Date of Expiry (YYYY-MM-DD)"] = expiryYear + "-" + expiryMonth + "-" + expiryDay;
+    return parseResultInfo;
+}
+
+async function initMRZ() {
+    await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD1_ID");
+    await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD2_FRENCH_ID");
+    await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD2_ID");
+    await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD2_VISA");
+    await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD3_PASSPORT");
+    await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD3_VISA");
+
+    await Dynamsoft.DLR.LabelRecognizerModule.loadRecognitionData("MRZ");
+
+    cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
+    parser = await Dynamsoft.DCP.CodeParser.createInstance();
+    let ret = await cvr.initSettings('template/mrz.json');
+    console.log(ret);
+}
+
 window.jsFunctions = {
 
     setLicense: async function setLicense(license) {
@@ -194,7 +292,8 @@ window.jsFunctions = {
                 dlr: "https://cdn.jsdelivr.net/npm/dynamsoft-label-recognizer@3.2.30/dist/",
                 dcp: "https://cdn.jsdelivr.net/npm/dynamsoft-code-parser@2.2.10/dist/",
                 ddn: "https://cdn.jsdelivr.net/npm/dynamsoft-document-normalizer@2.2.10/dist/",
-                dnn: "https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-dnn@1.0.20/dist/"
+                dnn: "https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-dnn@1.0.20/dist/",
+                dlrData: "https://cdn.jsdelivr.net/npm/dynamsoft-label-recognizer-data@1.0.11/dist/",
             };
             Dynamsoft.DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/engine";
             
@@ -215,12 +314,13 @@ window.jsFunctions = {
 
         return true;
     },
-    initReader: async function () {
+    initBarcodeReader: async function () {
         if (!isInitialized) {
             alert("Please set the license first.");
             return;
         }
         try {
+            templateName = 'ReadBarcodes_Balance';
             dispose();
             cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
 
@@ -228,7 +328,7 @@ window.jsFunctions = {
             alert(e);
         }
     },
-    initScanner: async function (dotnetRef, videoId, selectId, overlayId) {
+    initBarcodeScanner: async function (dotnetRef, videoId, selectId, overlayId) {
         if (!isInitialized) {
             alert("Please set the license first.");
             return;
@@ -239,6 +339,8 @@ window.jsFunctions = {
         videoSelect.onchange = openCamera;
 
         try {
+            templateName = 'ReadSingleBarcode'; // For better performance
+
             dispose();
 
             let cameraView = await Dynamsoft.DCE.CameraView.createInstance();
@@ -257,7 +359,7 @@ window.jsFunctions = {
 
             cvr.addResultReceiver({
                 onCapturedResultReceived: (result) => {
-                    showResults(result, dotnetRef);
+                    showBarcodeResults(result, dotnetRef);
                 },
             });
 
@@ -279,7 +381,7 @@ window.jsFunctions = {
         }
         return true;
     },
-    selectFile: async function (dotnetRef, overlayId, imageId) {
+    selectFile: async function (dotnetRef, overlayId, imageId, visionType) {
         if (cameraEnhancer) {
             cameraEnhancer.dispose();
             cameraEnhancer = null;
@@ -297,7 +399,7 @@ window.jsFunctions = {
                         image.src = fr.result;
                         image.style.display = 'block';
 
-                        decodeImage(dotnetRef, fr.result, file);
+                        decodeImage(dotnetRef, fr.result, visionType);
                     }
                     fr.readAsDataURL(file);
 
@@ -324,6 +426,10 @@ window.jsFunctions = {
         try {
             if (cameraEnhancer) {
                 cameraEnhancer.pause();
+            }
+
+            if (cvr) {
+                cvr.stopCapturing();
             }
         }
         catch (e) {
@@ -411,6 +517,63 @@ window.jsFunctions = {
             });
             alert(e);
         }
-    }
+    },
+    initMrzReader: async function () {
+        if (!isInitialized) {
+            alert("Please set the license first.");
+            return;
+        }
+        try {
+            templateName = 'ReadMRZ';
+            dispose();
+            await initMRZ();
+        } catch (e) {
+            console.log(e);
+        }
+    },
+    initMrzScanner: async function (dotnetRef, videoId, selectId, overlayId) {
+        if (!isInitialized) {
+            alert("Please set the license first.");
+            return;
+        }
+        let canvas = document.getElementById(overlayId);
+        initOverlay(canvas);
+        videoSelect = document.getElementById(selectId);
+        videoSelect.onchange = openCamera;
+
+        try {
+            templateName = 'ReadMRZ';
+
+            dispose();
+
+            await initMRZ();
+
+            let cameraView = await Dynamsoft.DCE.CameraView.createInstance();
+            cameraEnhancer = await Dynamsoft.DCE.CameraEnhancer.createInstance(cameraView);
+
+            let uiElement = document.getElementById(videoId);
+            uiElement.append(cameraView.getUIElement());
+
+            cameraView.getUIElement().shadowRoot?.querySelector('.dce-sel-camera')?.setAttribute('style', 'display: none');
+            cameraView.getUIElement().shadowRoot?.querySelector('.dce-sel-resolution')?.setAttribute('style', 'display: none');
+
+            cvr.setInput(cameraEnhancer);
+            cvr.addResultReceiver({
+                onCapturedResultReceived: (result) => {
+                    showMrzResults(result, dotnetRef);
+                },
+            });
+
+            cameraEnhancer.on('played', () => {
+                updateResolution();
+            });
+
+
+        } catch (e) {
+            alert(e);
+            result = false;
+        }
+        return true;
+    },
 };
 
