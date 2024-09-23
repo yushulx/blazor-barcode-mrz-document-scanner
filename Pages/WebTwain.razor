@@ -1,0 +1,81 @@
+﻿@page "/webtwain"
+@inject IJSRuntime JSRuntime
+@using System.Text.Json;
+
+@if (isLoading)
+{
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="spinner"></div>
+    </div>
+}
+
+<select id="@selectId"></select>
+<br />
+<button @onclick="AcquireImage">Scan Documents</button>
+<button @onclick="LoadDocument">Load Documents</button>
+<button @onclick="RemoveSelected">Remove Selected</button>
+<button @onclick="RemoveAll">Remove All</button>
+<button @onclick="Save">Save Documents to PDF</button>
+
+<div id="@containerId"></div>
+
+@code {
+    private Boolean isLoading = true;
+    private string containerId = "document-container";
+    private string selectId = "sources";
+    private int containerWidth = 800;
+    private int containerHeight = 800;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("jsFunctions.initWebTwain", containerId, containerWidth, containerHeight);
+            await JSRuntime.InvokeVoidAsync("jsFunctions.getDevices", selectId);
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    public async Task AcquireImage()
+    {
+        // https://www.dynamsoft.com/web-twain/docs/info/api/WebTwain_Acquire.html#acquireimageasync
+        var deviceConfiguration = new
+        {
+            IfShowUI = false,
+            PixelType = Utils.PixelType.TWPT_RGB,
+            Resolution = 300,
+            IfFeederEnabled = true,
+            IfDuplexEnabled = false,
+            IfDisableSourceAfterAcquire = true,
+            IfGetImageInfo = true,
+            IfGetExtImageInfo = true,
+            extendedImageInfoQueryLevel = 0
+        };
+        // serialize the object to a JSON string
+        var jsonString = JsonSerializer.Serialize(deviceConfiguration);
+
+        await JSRuntime.InvokeVoidAsync("jsFunctions.acquireImage", jsonString);
+
+    }
+
+    public async Task LoadDocument()
+    {
+        await JSRuntime.InvokeVoidAsync("jsFunctions.loadDocument");
+    }
+
+    public async Task RemoveSelected()
+    {
+        await JSRuntime.InvokeVoidAsync("jsFunctions.removeSelected");
+    }
+
+    public async Task RemoveAll()
+    {
+        await JSRuntime.InvokeVoidAsync("jsFunctions.removeAll");
+    }
+
+    public async Task Save()
+    {
+        await JSRuntime.InvokeVoidAsync("jsFunctions.save", Utils.ImageType.PDF, "test");
+    }
+}

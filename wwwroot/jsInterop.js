@@ -17,6 +17,9 @@ let cvr = null;
 let cameraEnhancer = null;
 let parser = null
 let templateName = '';
+let dwtObject = null;
+let sourceList = null;
+let selectSources = null;
 
 function initOverlay(ol) {
     overlay = ol;
@@ -306,6 +309,9 @@ window.jsFunctions = {
             Dynamsoft.DDV.setProcessingHandler("imageFilter", new Dynamsoft.DDV.ImageFilter());
             await Dynamsoft.DDV.Core.init();
 
+            Dynamsoft.DWT.ResourcesPath = "dist";
+            Dynamsoft.DWT.ProductKey = license;
+
             isInitialized = true;
         } catch (e) {
             alert(e);
@@ -575,5 +581,153 @@ window.jsFunctions = {
         }
         return true;
     },
+    initWebTwain: async function (containerId, width, height) {
+        if (!isInitialized) {
+            alert("Please set the license first.");
+            return;
+        }
+
+        try {
+            await new Promise((resolve, reject) => {
+                Dynamsoft.DWT.CreateDWTObjectEx({ "WebTwainId": containerId }, (obj) => {
+                    dwtObject = obj;
+                    dwtObject.Viewer.bind(document.getElementById(containerId));
+                    dwtObject.Viewer.width = width;
+                    dwtObject.Viewer.height = height;
+                    dwtObject.Viewer.show();
+                    resolve();
+                }, (errorString) => {
+                    console.log(errorString);
+                    resolve();
+                });
+            });
+        }
+        catch (e) {
+            alert(e);
+        }
+    },
+    getDevices: async function (selectId) {
+        await new Promise((resolve, reject) => {
+            if (!dwtObject) {
+                resolve();
+                return;
+            }
+
+            dwtObject.GetDevicesAsync(Dynamsoft.DWT.EnumDWT_DeviceType.TWAINSCANNER | Dynamsoft.DWT.EnumDWT_DeviceType.TWAINX64SCANNER | Dynamsoft.DWT.EnumDWT_DeviceType.ESCLSCANNER).then((sources) => {
+                sourceList = sources;
+
+                selectSources = document.getElementById(selectId);
+                for (let i = 0; i < sources.length; i++) {
+                    let option = document.createElement("option");
+                    option.text = sources[i].displayName;
+                    option.value = i.toString();
+                    selectSources.add(option);
+                }
+
+                resolve();
+            });
+        });
+    },
+    acquireImage: async function (jsonString) {
+        await new Promise((resolve, reject) => {
+            if (!dwtObject || sourceList.length == 0) {
+                resolve();
+                return;
+            }
+
+            if (selectSources) {
+                dwtObject.SelectDeviceAsync(sourceList[selectSources.selectedIndex]).then(() => {
+
+                    return dwtObject.OpenSourceAsync()
+
+                }).then(() => {
+
+                    return dwtObject.AcquireImageAsync(JSON.parse(jsonString))
+
+                }).then(() => {
+
+                    if (dwtObject) {
+
+                        dwtObject.CloseSource();
+
+                    }
+
+                    resolve();
+
+                }).catch(
+
+                    (e) => {
+
+                        console.error(e);
+                        resolve();
+
+                    }
+
+                )
+            }
+            else {
+                resolve();
+            }
+        });
+    },
+    loadDocument: async function () {
+        await new Promise((resolve, reject) => {
+            if (!dwtObject) {
+                resolve();
+                return;
+            }
+
+            dwtObject.Addon.PDF.SetConvertMode(Dynamsoft.DWT.EnumDWT_ConvertMode.CM_RENDERALL);
+            let ret = dwtObject.LoadImageEx("", Dynamsoft.DWT.EnumDWT_ImageType.IT_ALL);
+            resolve();
+        });
+    },
+
+    removeSelected: async function () {
+        await new Promise((resolve, reject) => {
+            if (!dwtObject) {
+                resolve();
+                return;
+            }
+
+            dwtObject.RemoveImage(dwtObject.CurrentImageIndexInBuffer);
+            resolve();
+        });
+
+    },
+    removeAll: async function () {
+        await new Promise((resolve, reject) => {
+            if (!dwtObject) {
+                resolve();
+                return;
+            }
+
+            dwtObject.RemoveAllImages();
+            resolve();
+        });
+
+    },
+    save: async function (type, name) {
+        await new Promise((resolve, reject) => {
+            if (!dwtObject) {
+                resolve();
+                return;
+            }
+
+            if (type == 0) {
+                if (dwtObject.GetImageBitDepth(dwtObject.CurrentImageIndexInBuffer) == 1)
+                    dwtObject.ConvertToGrayScale(dwtObject.CurrentImageIndexInBuffer);
+                dwtObject.SaveAsJPEG(name + ".jpg", dwtObject.CurrentImageIndexInBuffer);
+            }
+            else if (type == 1)
+                dwtObject.SaveAllAsMultiPageTIFF(name + ".tiff");
+            else if (type == 2) { 
+                dwtObject.SaveAllAsPDF(name + ".pdf");
+            }
+
+            alert("Save successfully!");
+            resolve();
+        });
+    }
 };
 
