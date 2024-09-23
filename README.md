@@ -14,6 +14,10 @@ This project demonstrates how to utilize the Dynamsoft Capture Vision SDK for de
 
   https://github.com/user-attachments/assets/c77574d2-e798-4bc8-95e5-2b4838c575f4
 
+- **Web TWAIN Document Scanning**
+
+  https://github.com/user-attachments/assets/1fdd6b73-dc45-4930-9f7a-28fb8075e7c7
+
 
 
 ## Usage
