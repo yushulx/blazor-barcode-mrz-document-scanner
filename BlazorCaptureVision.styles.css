@@ -328,3 +328,10 @@ textarea[b-krzz35i1h4] {
     border: 1px solid #ddd;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+/* /Pages/WebTwain.razor.rz.scp.css */
+@page "/webtwain"
+<h3>Component</h3>
+
+@code[b-8zryjiloln] {
+
+}
