@@ -43,3 +43,4 @@ This project demonstrates how to utilize the Dynamsoft Capture Vision SDK for de
 - [How to Create a Blazor Web App for Document PDF Viewing and Annotation](https://www.dynamsoft.com/codepool/blazor-document-pdf-annotation-viewer.html)
 - [How to Integrate MRZ Recognition into a Blazor Web Application](https://www.dynamsoft.com/codepool/dotnet-blazor-passport-mrz-reader-scanner.html)
 - [How to Digitize Documents in a Blazor Web App Using TWAIN, WIA, SANE, ICA, and eSCL Scanners](https://www.dynamsoft.com/codepool/dotnet-blazor-web-twain-document-scanning.html)
+- [Blazor WebAssembly: Building Web Apps for Digitizing Documents with C# and .NET](https://www.dynamsoft.com/codepool/dotnet-blazor-webassembly-digitize-document.html)
