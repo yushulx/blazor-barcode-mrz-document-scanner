@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject IJSRuntime JSRuntime
+@inject AppStateService AppState
 
 <PageTitle>Home</PageTitle>
 
@@ -21,7 +22,11 @@
     private Boolean isLoading = false;
     Boolean initialized = false;
 
-    private string LicenseKey = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
+    private string LicenseKey
+    {
+        get => AppState.LicenseKey;
+        set => AppState.LicenseKey = value;
+    }
 
     private async Task SetLicenseKey()
     {
