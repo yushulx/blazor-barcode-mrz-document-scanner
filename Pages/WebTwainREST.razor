@@ -1,5 +1,6 @@
 ﻿@page "/webtwainrest"
 @using Twain.Wia.Sane.Scanner
+@using Newtonsoft.Json;
 @inject AppStateService AppState
 
 <h1>Digitizing Documents in Blazor</h1>
@@ -84,7 +85,21 @@
 
         try
         {
-            devices = await scannerController.GetDevices(host);
+            var scannerInfo = await scannerController.GetDevices(host);
+            try
+            {
+                var scanners = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(scannerInfo);
+                for (int i = 0; i < scanners.Count; i++)
+                {
+                    var scanner = scanners[i];
+                    devices.Add(scanner);
+                    Console.WriteLine($"\nIndex: {i}, Name: {scanner["name"]}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
             if (devices.Count > 0)
             {
                 selectedValue = devices[0]["name"].ToString();
@@ -122,17 +137,22 @@
                     {"IfFeederEnabled", false},
                     {"IfDuplexEnabled", false}
                 };
-        var text = await scannerController.ScanDocument(host, parameters);
+        var jobInfo = await scannerController.CreateJob(host, parameters);
         string jobId = "";
-        if (text.ContainsKey(ScannerController.SCAN_SUCCESS))
-        {
-            jobId = text[ScannerController.SCAN_SUCCESS];
-        }
 
-        string error = "";
-        if (text.ContainsKey(ScannerController.SCAN_ERROR))
+        try
         {
-            error = text[ScannerController.SCAN_ERROR];
+            var job = JsonConvert.DeserializeObject<Dictionary<string, object>>(jobInfo);
+            jobId = (string)job["jobuid"];
+
+            if (string.IsNullOrEmpty(jobId))
+            {
+                Console.WriteLine("Failed to create job.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
         }
 
         if (!string.IsNullOrEmpty(jobId))

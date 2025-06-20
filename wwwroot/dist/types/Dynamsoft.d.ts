@@ -276,12 +276,12 @@ export interface DWTPro {
      */
     DeleteDWTObject(Id: string): boolean;
     /**
-     * Return the WebTwain instance specified by its ContainerId or WebTwainId. If no parameter is provided, the first valid WebTwain instance is returnd.
+     * Return the WebTwain instance specified by its ContainerId or WebTwainId. If no parameter is provided, the first valid WebTwain instance is returned.
      * @param ContainerIdOrWebTwainId The ContainerId or WebTwainId.
      */
     GetWebTwain(ContainerIdOrWebTwainId?: string): WebTwain;
     /**
-     * Return the WebTwain instance specified by its ContainerId or WebTwainId. If no parameter is provided, the first valid WebTwain instance is returnd.
+     * Return the WebTwain instance specified by its ContainerId or WebTwainId. If no parameter is provided, the first valid WebTwain instance is returned.
      * @param ContainerIdOrWebTwainId The ContainerId or WebTwainId.
      */
     GetWebTwainEx(ContainerIdOrWebTwainId?: string): WebTwain;
@@ -390,7 +390,7 @@ export interface DWTPro {
      * @param event Specify the event.
      * @param callback Specify the callback.
      */
-    RegisterEvent(event: string, callback: (...args: any[]) => void): boolean;
+    RegisterEvent(event: string, callback: (...args: any[]) => void): void;
     /**
      * Remove all authorizations for accessing local resources.
      */

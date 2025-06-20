@@ -153,7 +153,7 @@ async function showMrzResults(result, dotnetRef) {
         }
     } catch (e) {
         alert(e);
-    }    
+    }
 }
 
 function showBarcodeResults(result, dotnetRef) {
@@ -208,7 +208,7 @@ async function openCamera() {
             cvr.startCapturing(templateName);
         }
     }
-    catch(e) {
+    catch (e) {
         alert(e);
     }
 }
@@ -269,8 +269,8 @@ async function initMRZ() {
     await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD2_VISA");
     await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD3_PASSPORT");
     await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD3_VISA");
-
-    await Dynamsoft.DLR.LabelRecognizerModule.loadRecognitionData("MRZ");
+    await Dynamsoft.CVR.CaptureVisionRouter.appendModelBuffer("MRZCharRecognition");
+    await Dynamsoft.CVR.CaptureVisionRouter.appendModelBuffer("MRZTextLineRecognition");
 
     cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
     parser = await Dynamsoft.DCP.CodeParser.createInstance();
@@ -300,10 +300,9 @@ window.jsFunctions = {
             //    dlrData: "https://cdn.jsdelivr.net/npm/dynamsoft-label-recognizer-data@1.0.11/dist/",
             //};
             //Dynamsoft.DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/engine";
-            
+
             Dynamsoft.License.LicenseManager.initLicense(license, true);
 
-            await Dynamsoft.Core.CoreModule.loadWasm(["DIP"]);
             await Dynamsoft.Core.CoreModule.loadWasm(["DBR", "DDN", "DLR"]);
 
             cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
@@ -359,7 +358,7 @@ window.jsFunctions = {
             cameraView.getUIElement().shadowRoot?.querySelector('.dce-sel-camera')?.setAttribute('style', 'display: none');
             cameraView.getUIElement().shadowRoot?.querySelector('.dce-sel-resolution')?.setAttribute('style', 'display: none');
 
-            
+
 
             cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
             cvr.setInput(cameraEnhancer);
@@ -381,7 +380,7 @@ window.jsFunctions = {
                 updateResolution();
             });
 
-         
+
         } catch (e) {
             alert(e);
             result = false;
@@ -426,7 +425,7 @@ window.jsFunctions = {
             listCameras(cameras);
         }
     },
-    startCamera: async function() {
+    startCamera: async function () {
         openCamera();
     },
     stopCamera: async function () {
@@ -480,7 +479,7 @@ window.jsFunctions = {
             await captureViewer.play({ resolution: [1920, 1080] });
 
             captureViewer.on("showPerspectiveViewer", () => switchViewer(0, 1, 0));
-            
+
             const perspectiveViewer = new Dynamsoft.DDV.PerspectiveViewer({
                 container: containerId,
                 groupUid: captureViewer.groupUid,
@@ -514,7 +513,7 @@ window.jsFunctions = {
                 if (p) perspectiveViewer.show();
                 if (e) editViewer.show();
             };
-            
+
         }
         catch (e) {
             console.log({
@@ -722,7 +721,7 @@ window.jsFunctions = {
             }
             else if (type == 1)
                 dwtObject.SaveAllAsMultiPageTIFF(name + ".tiff");
-            else if (type == 2) { 
+            else if (type == 2) {
                 dwtObject.SaveAllAsPDF(name + ".pdf");
             }
 
