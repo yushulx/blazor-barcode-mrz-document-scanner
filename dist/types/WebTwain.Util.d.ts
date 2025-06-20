@@ -10,6 +10,10 @@ export interface WebTwainUtil {
      */
     readonly ErrorString: string;
     /**
+     * The reason for returning the error is an extension of the ErrorString.
+     */
+    readonly ErrorCause: {code: number, message: string} | null;
+    /**
      * Return or set the log level for debugging.
      */
     LogLevel: number;
@@ -31,7 +35,7 @@ export interface WebTwainUtil {
      */
     readonly ProductName: string;
     /**
-     * Generate a URL to be used by a FileUpoader instance to fetch the data to upload.
+     * Generate a URL to be used by a FileUploader instance to fetch the data to upload.
      * @param indices Specify the images to upload.
      * @param type Specify the file type.
      * @param successCallback A callback function that is executed if the request succeeds.

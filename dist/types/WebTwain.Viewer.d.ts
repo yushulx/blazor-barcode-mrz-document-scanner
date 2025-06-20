@@ -17,12 +17,12 @@ export interface WebTwainViewer extends WebTwainAcquire {
     UnbindViewer(): boolean;
     /**
 	 * @deprecated since version 16.2. This property will be removed in future versions. Use `Viewer.background` instead.
-     * Return or set the background colour of the viewer.
+     * Return or set the background color of the viewer.
      */
     BackgroundColor: number;
     /**
 	 * @deprecated since version 16.2. This property will be removed in future versions. Use function `Viewer.selectedPageBorder` instead.
-     * Return or set the border colour for selected image(s).
+     * Return or set the border color for selected image(s).
      */
     SelectionImageBorderColor: number;
     /**
@@ -32,7 +32,7 @@ export interface WebTwainViewer extends WebTwainAcquire {
     FitWindowType: number;
     /**
 	 * @deprecated since version 16.2. This property will be removed in future versions. Use function `Viewer.fitWindow` instead.
-     * Return or set the border colour for selected image(s).
+     * Return or set the border color for selected image(s).
      */
     IfFitWindow: boolean;
     /**
@@ -101,7 +101,7 @@ export interface DynamsoftViewer {
     readonly idPostfix: string;
     /**
      * [Scope] Main viewer
-     * [Description] Return or set the background colour/image of the viewer.
+     * [Description] Return or set the background color/image of the viewer.
      * [Usage Notes] 'Invalid property value' is reported when the set value does not meet the CSS standard.
      * Replace the previous `BackgroundColor` method.
      * Allow any CSS rules
@@ -233,6 +233,10 @@ export interface DynamsoftViewer {
 		y: string;  //Default is "center", values: "top", "bottom", "center"
 	} 
     /**
+     * Whether the viewer removes the focus border after selecting with the Tab key.  Default value: true.
+     */
+    disableFocusOutline: boolean;  // default value: true
+    /**
      * [Scope] Main viewer
      * [Description] Return the index of the next image of the currently selected image.
      */
@@ -353,6 +357,10 @@ export interface DynamsoftViewer {
         columns: number,
         rows: number
     ): boolean;	
+    /**
+     * Return the info of visible pages. It is useful to add elements to document page images in the viewer.
+     */
+    getVisiblePagesInfo(): VisiblePageInfo[];
     /**
      * [Scope] Global
      * [Description] Create a Dynamsoft Viewer instance and bind it to the WebTwain instance.
@@ -557,7 +565,7 @@ export interface ThumbnailViewerSettings {
     autoChangeIndex?: boolean;
     /**
      * [Scope] Thumbnail viewer
-     * [Description] Return or set the background colour/image of the thumbnail viewer. The default value is white.
+     * [Description] Return or set the background color/image of the thumbnail viewer. The default value is white.
      * [Usage Notes] 'Invalid property value' will be reported when the specified value type is wrong or the parameter name is spelled incorrectly.
      * Allow any CSS rules
      */
@@ -656,7 +664,7 @@ export interface ImageEditor {
 	};	
 	/**
      * [Scope] ImageEditor viewer
-     * Set the selction box styling.
+     * Set the selection box styling.
      * @argument selectionBoxStyleSettings Settings for selection box.
      */
 	updateSelectionBoxStyle(selectionBoxStyleSettings?: SelectionBoxStyleSettings): boolean;
@@ -695,12 +703,16 @@ export interface ThumbnailViewer {
      */
 	updatePageNumberStyle(pageNumberSettings?: PageNumberSettings): void;
     /**
+     * Return the info of visible pages. It is useful to add elements to document page images in the viewer.
+     */
+      getVisiblePagesInfo(): VisiblePageInfo[];
+    /**
      * [Scope] Thumbnail viewer
      * [Description] Specify an event listener for the viewer event.
      * @param name Specify the event name.
      * @param callback The event listener.
      */
-	on(eventName: string, callback: (...param: any[]) => void): void;
+    on(eventName: string, callback: (event: ThumbnailViewerEvent | KeyboardEvent, domEvent?: MouseEvent) => void): void;
     /**
      * [Scope] Thumbnail viewer
      * [Description] Remove the event handler.
@@ -786,7 +798,7 @@ export interface ThumbnailViewer {
     autoChangeIndex: boolean;
     /**
      * [Scope] Thumbnail viewer
-     * [Description] Return or set the background colour/image of the thumbnail viewer. The default value is white.
+     * [Description] Return or set the background color/image of the thumbnail viewer. The default value is white.
      * [Usage Notes] 'Invalid property value' will be reported when the specified value type is wrong or the parameter name is spelled incorrectly.
      * Allow any CSS rules
      */
@@ -880,19 +892,98 @@ export interface ViewerEvent {
      */
     pageY: number;
 }
+/**
+* Info of a visible page.
+*/
+export interface VisiblePageInfo {
+    /**
+     * The index of the document page.
+     */
+    pageIndex: number;
+    /**
+     * Whether the mouse is hovering over the document page.
+     */
+    isHovered: boolean;
+    /**
+     * Whether the document page is selected.
+     */
+    isSelected: boolean;
+    /**
+     * The width of the document page image container.
+     */
+    pageWidth: number;
+    /**
+     * The height of the document page image container.
+     */
+    pageHeight: number;
+     /**
+     * The x coordinate relative to the canvas.
+     */
+    canvasOffsetX: number;
+    /**
+     * The y coordinate relative to the canvas.
+     */
+    canvasOffsetY: number;
+    /**
+     * The x coordinate relative to the container of the viewer.
+     */
+    containerOffsetX: number;
+    /**
+     * The y coordinate relative to the container of the viewer.
+     */
+    containerOffsetY: number;
+ }
+
 export interface ThumbnailViewerEvent {
     /**
-     * The index of the current image.
+     * The index of the current document page.
      */
     index: number;
     /**
-     * The x-coordinate relative to the browser page.
+     * The mouse's x coordinate in the thumbnail image container relative to the top-left of the web page.
      */
     pageX: number;
     /**
-     * The y-coordinate relative to the browser page.
+     * The  mouse's y coordinate in the thumbnail image container relative to the top-left of the web page.
      */
     pageY: number;
+    /**
+     * The width of the thumbnail image container.
+     */
+    imageX: number;
+    /**
+     * The height of the thumbnail image container.
+     */
+    imageY: number;
+    /**
+     * The corresponding x coordinate in the original image.
+     */
+    pageHeight: number;
+    /**
+     * The corresponding y coordinate in the original image.
+     */
+    pageWidth: number;
+    /**
+     * The thumbnail image container's relative position.
+     */
+    position: {
+        /**
+         * The x coordinate relative to the container of the viewer.
+         */
+        canvasOffsetX: number;
+        /**
+         * The y coordinate relative to the container of the viewer.
+         */
+        canvasOffsetY: number;
+        /**
+         * The x coordinate relative to the canvas.
+         */
+        containerOffsetX: number;
+        /**
+         * The y coordinate relative to the canvas.
+         */
+        containerOffsetY: number;
+    }
 }
 export interface Area {
 	left: number;
@@ -939,10 +1030,10 @@ export interface PageNumberSettings {
   translateY?: number | string; //default: "", number unit: px, string value: "10px"/"10%", relative to itself
 }
 export interface SelectionBoxStyleSettings {
-  borderColor?: string;  //Default: rgba(0,0,0,1). Colour in "rgba(r, g, b, a)"
+  borderColor?: string;  //Default: rgba(0,0,0,1). Color in "rgba(r, g, b, a)"
   borderWidth?: number;  //Default: 1. Pixels. Width of individual pattern segments.
   lineDash?: [number,number];  //Default: [5,2]. Pixels. Line spacing where x is shaded pixels and y is gap in pixels.
   handleWidth?: number;  //Default: 9. Pixels.
   handleHeight?: number;   //Default: 9. Pixels
-  handleColor?: string;  //Default: rgba(0,0,0,1). Colour in "rgba(r, g, b, a)"
+  handleColor?: string;  //Default: rgba(0,0,0,1). Color in "rgba(r, g, b, a)"
 }
