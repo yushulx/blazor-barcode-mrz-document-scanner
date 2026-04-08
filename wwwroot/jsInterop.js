@@ -269,8 +269,8 @@ async function initMRZ() {
     await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD2_VISA");
     await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD3_PASSPORT");
     await Dynamsoft.DCP.CodeParserModule.loadSpec("MRTD_TD3_VISA");
-    await Dynamsoft.CVR.CaptureVisionRouter.appendModelBuffer("MRZCharRecognition");
-    await Dynamsoft.CVR.CaptureVisionRouter.appendModelBuffer("MRZTextLineRecognition");
+    await Dynamsoft.CVR.CaptureVisionRouter.appendDLModelBuffer("MRZCharRecognition");
+    await Dynamsoft.CVR.CaptureVisionRouter.appendDLModelBuffer("MRZTextLineRecognition");
 
     cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
     parser = await Dynamsoft.DCP.CodeParser.createInstance();
@@ -306,10 +306,14 @@ window.jsFunctions = {
             await Dynamsoft.Core.CoreModule.loadWasm(["DBR", "DDN", "DLR"]);
 
             cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
+
+            Dynamsoft.DDV.Core.license = license;
+            Dynamsoft.DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.2.1/dist/engine";
             Dynamsoft.DDV.setProcessingHandler("imageFilter", new Dynamsoft.DDV.ImageFilter());
             await Dynamsoft.DDV.Core.init();
 
-            Dynamsoft.DWT.ResourcesPath = "dist";
+            Dynamsoft.DWT.ResourcesPath = "https://cdn.jsdelivr.net/npm/dwt@19.3.2/dist";
+            Dynamsoft.DWT.ServiceInstallerLocation = "https://download2.dynamsoft.com/Demo/DWT/Resources/dist/";
             //Dynamsoft.DWT.ProductKey = license;
 
             isInitialized = true;
