@@ -8,16 +8,17 @@
     </div>
 }
 
-<button @onclick="ReadMrz">Select an image</button>
-
-<div id="imageview">
-    <img id="@imageId" />
-    <canvas id="@overlayId"></canvas>
-
-</div>
-
-<div>
-    <textarea @bind="result"></textarea>
+<div class="card">
+    <h2>MRZ Reader</h2>
+    <p class="card-note">Read passport, ID card and visa MRZ strings from an image file.</p>
+    <div class="control-row">
+        <button class="btn-primary" @onclick="ReadMrz">Select an image</button>
+    </div>
+    <div id="imageview">
+        <img id="@imageId" />
+        <canvas id="@overlayId"></canvas>
+    </div>
+    <textarea @bind="result" readonly placeholder="Parsed MRZ data will appear here..."></textarea>
 </div>
 
 @code {

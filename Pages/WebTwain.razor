@@ -9,15 +9,22 @@
     </div>
 }
 
-<select id="@selectId"></select>
-<br />
-<button @onclick="AcquireImage">Scan Documents</button>
-<button @onclick="LoadDocument">Load Documents</button>
-<button @onclick="RemoveSelected">Remove Selected</button>
-<button @onclick="RemoveAll">Remove All</button>
-<button @onclick="Save">Save Documents to PDF</button>
-
-<div id="@containerId"></div>
+<div class="card">
+    <h2>Web TWAIN Document Scanning</h2>
+    <p class="card-note">Acquire documents from local TWAIN/WIA/SANE/ICA scanners with Dynamic Web TWAIN. Needs the Dynamsoft service installed on this machine.</p>
+    <div class="control-row">
+        <label for="@selectId">Source</label>
+        <select id="@selectId"></select>
+    </div>
+    <div class="control-row">
+        <button class="btn-primary" @onclick="AcquireImage">Scan Documents</button>
+        <button @onclick="LoadDocument">Load Documents</button>
+        <button @onclick="RemoveSelected">Remove Selected</button>
+        <button @onclick="RemoveAll">Remove All</button>
+        <button @onclick="Save">Save as PDF</button>
+    </div>
+    <div id="@containerId" class="dwt-container"></div>
+</div>
 
 @code {
     private Boolean isLoading = true;

@@ -9,17 +9,19 @@
     </div>
 }
 
-<div class="select">
-    <button @onclick="GetCameras">Get Cameras</button>
-    <label for="videoSource"></label>
-    <select id="@videoSourceId"></select>
-    <button @onclick="StartCamera">Open Camera</button>
-    <button @onclick="StopCamera">Stop Camera</button>
-</div>
-
-<div id="videoview">
-    <div class="dce-video-container" id="@videoContainerId"></div>
-    <canvas id="@overlayId"></canvas>
+<div class="card">
+    <h2>Barcode &amp; QR Code Scanner</h2>
+    <p class="card-note">Scan barcodes and QR codes with the camera. Pick a camera and open it to start scanning.</p>
+    <div class="control-row">
+        <button @onclick="GetCameras">Get Cameras</button>
+        <label for="@videoSourceId">Camera</label>
+        <select id="@videoSourceId"></select>
+        <button class="btn-primary" @onclick="StartCamera">Open Camera</button>
+        <button @onclick="StopCamera">Stop Camera</button>
+    </div>
+    <div id="videoview">
+        <div class="dce-video-container" id="@videoContainerId"></div>
+    </div>
 </div>
 
 @code {
@@ -27,7 +29,6 @@
     private String result = "";
     private DotNetObjectReference<BarcodeScanner>? objRef;
     private string videoSourceId = "videoSource";
-    private string overlayId = "overlay";
     private string videoContainerId = "videoContainer";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -35,7 +36,7 @@
         if (firstRender)
         {
             objRef = DotNetObjectReference.Create(this);
-            await JSRuntime.InvokeVoidAsync("jsFunctions.initBarcodeScanner", objRef, videoContainerId, videoSourceId, overlayId);
+            await JSRuntime.InvokeVoidAsync("jsFunctions.initBarcodeScanner", objRef, videoContainerId, videoSourceId);
             isLoading = false;
             StateHasChanged();
         }

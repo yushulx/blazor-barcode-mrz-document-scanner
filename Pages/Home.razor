@@ -2,14 +2,7 @@
 @inject IJSRuntime JSRuntime
 @inject AppStateService AppState
 
-<PageTitle>Home</PageTitle>
-
-<p>Click <a href="https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform" target="_blank">here</a> to obtain a Dynamsoft Capture Vision Trial License.</p>
-
-<EditForm Model="@this">
-    <InputText @bind-Value="LicenseKey" placeholder="Enter your license key" />
-    <button type="button" class="btn btn-primary" @onclick="SetLicenseKey">Activate the SDK</button>
-</EditForm>
+<PageTitle>Blazor Capture Vision — Barcode, MRZ and Document Scanner</PageTitle>
 
 @if (isLoading)
 {
@@ -18,9 +11,99 @@
     </div>
 }
 
+@if (isHostedDemo)
+{
+    <div class="card">
+        <h2>Dynamsoft Capture Vision</h2>
+        <div class="sdk-status @(sdkReady ? "is-ready" : "is-busy")">
+            <span class="sdk-status-dot"></span>
+            @if (sdkReady)
+            {
+                <span>Dynamsoft SDK ready <span class="sdk-status-note">(@licenseNote)</span></span>
+            }
+            else
+            {
+                <span>Initializing the Dynamsoft SDK&hellip;</span>
+            }
+        </div>
+        <p class="card-note">
+            This hosted demo activates the SDK automatically &mdash; no account and no key needed.
+            Pick any example below; the TWAIN/SANE/ICA examples need a desktop browser with the
+            <a href="https://www.dynamsoft.com/web-twain/overview/" target="_blank" rel="noopener">Dynamic Web TWAIN</a>
+            local service installed, everything else also runs on phones.
+        </p>
+    </div>
+
+    <div class="examples">
+        <h2>Examples</h2>
+        <div class="example-grid">
+            @foreach (var example in Examples)
+            {
+                <a class="example-card" href="@example.Route">
+                    <span class="example-name">@example.Name</span>
+                    <span class="example-desc">@example.Description</span>
+                </a>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="card">
+        <h2>Activate the SDK</h2>
+        <p class="card-note">
+            Get a license key from
+            <a href="https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&amp;package=cross-platform" target="_blank" rel="noopener">Dynamsoft</a>
+            and paste it below. An SDK trial key is pre-filled, so you can also just press the button.
+        </p>
+        <div class="license-row">
+            <input type="text" @bind="LicenseKey" placeholder="Enter your license key" aria-label="License key" />
+            <button type="button" class="btn-primary" @onclick="SetLicenseKey" disabled="@isLoading">Activate SDK</button>
+        </div>
+        @if (!string.IsNullOrEmpty(activationError))
+        {
+            <p class="card-note error">@activationError</p>
+        }
+    </div>
+
+    @if (initialized)
+    {
+        <div class="examples">
+            <h2>Examples</h2>
+            <div class="example-grid">
+                @foreach (var example in Examples)
+                {
+                    <a class="example-card" href="@example.Route">
+                        <span class="example-name">@example.Name</span>
+                        <span class="example-desc">@example.Description</span>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+}
+
 @code {
-    private Boolean isLoading = false;
-    Boolean initialized = false;
+    private bool isLoading = false;
+    private bool initialized = false;
+    private bool isHostedDemo = false;
+    private bool sdkReady = false;
+    private string licenseNote = "";
+    private string activationError = "";
+
+    private record ExampleLink(string Name, string Route, string Description);
+
+    private static readonly ExampleLink[] Examples =
+    {
+        new("Barcode Reader", "barcodereader", "Decode barcodes and QR codes from an image"),
+        new("Barcode Scanner", "barcodescanner", "Scan barcodes and QR codes with the camera"),
+        new("MRZ Reader", "mrzreader", "Read passport and ID card MRZ from an image"),
+        new("MRZ Scanner", "mrzscanner", "Scan passport and ID card MRZ with the camera"),
+        new("Document Viewer", "documentviewer", "View, edit and annotate documents"),
+        new("Document Scanner", "documentscanner", "Detect document boundaries and rectify"),
+        new("Web TWAIN", "webtwain", "Acquire scans from TWAIN/WIA/SANE scanners"),
+        new("Web TWAIN REST", "webtwainrest", "Acquire scans through the Dynamsoft REST API"),
+    };
 
     private string LicenseKey
     {
@@ -28,10 +111,53 @@
         set => AppState.LicenseKey = value;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        isHostedDemo = await JSRuntime.InvokeAsync<bool>("jsFunctions.isHostedDemo");
+        if (isHostedDemo)
+        {
+            licenseNote = await JSRuntime.InvokeAsync<string>("jsFunctions.licenseNote");
+            // The SDK is activating in the background (started by jsInterop.js).
+            // Do not block the first render on it; update the status when done.
+            _ = WaitForActivationAsync();
+        }
+    }
+
+    private async Task WaitForActivationAsync()
+    {
+        try
+        {
+            sdkReady = await JSRuntime.InvokeAsync<bool>("jsFunctions.waitForActivation");
+        }
+        catch
+        {
+            sdkReady = false;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
     private async Task SetLicenseKey()
     {
         isLoading = true;
-        initialized = await JSRuntime.InvokeAsync<Boolean>("jsFunctions.setLicense", LicenseKey);
+        activationError = "";
+        StateHasChanged();
+        try
+        {
+            initialized = await JSRuntime.InvokeAsync<bool>("jsFunctions.setLicense", LicenseKey);
+            if (!initialized)
+            {
+                activationError = "The license could not be activated. Check the key and try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            activationError = ex.Message;
+        }
         isLoading = false;
         StateHasChanged();
     }

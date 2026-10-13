@@ -8,12 +8,17 @@
     </div>
 }
 
-<button @onclick="ReadBarcodes">Select an image</button>
-<p class="p-result">@result</p>
-
-<div id="imageview">
-    <img id="@imageId" />
-    <canvas id="@overlayId"></canvas>
+<div class="card">
+    <h2>Barcode &amp; QR Code Reader</h2>
+    <p class="card-note">Decode barcodes and QR codes from an image file.</p>
+    <div class="control-row">
+        <button class="btn-primary" @onclick="ReadBarcodes">Select an image</button>
+    </div>
+    <p class="p-result">@result</p>
+    <div id="imageview">
+        <img id="@imageId" />
+        <canvas id="@overlayId"></canvas>
+    </div>
 </div>
 
 @code {

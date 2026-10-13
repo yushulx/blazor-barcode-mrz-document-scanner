@@ -1,6 +1,6 @@
-﻿@page "/webtwain"
-<h3>Component</h3>
+﻿/* The Dynamic Web TWAIN viewer sizes itself in jsInterop.js (initWebTwain);
+   this only adds breathing room under the toolbar. */
 
-@code {
-
+.dwt-container {
+    margin-top: 8px;
 }

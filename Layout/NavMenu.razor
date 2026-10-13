@@ -1,55 +1,53 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">BlazorCaptureVision</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
+﻿<div class="top-row">
+    <a class="navbar-brand" href="">Blazor Capture Vision</a>
+    <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 </div>
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
+    <nav class="nav-list">
+        <div class="nav-item">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="barcodereader">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Barcode Reader
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="barcodescanner">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Barcode Scanner
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="documentviewer">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Document Viewer
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="documentscanner">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Document Scanner
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="mrzreader">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> MRZ Reader
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="mrzscanner">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> MRZ Scanner
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="webtwain">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Web TWAIN
             </NavLink>
         </div>
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="webtwainrest">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Web TWAIN REST API
             </NavLink>

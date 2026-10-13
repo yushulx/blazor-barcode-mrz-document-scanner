@@ -1,4 +1,7 @@
-﻿.container {
-    /*width: 88vw;*/
+﻿/* The Dynamsoft Document Viewer UI is mounted inside this container; give it
+   most of the viewport like the other scanner pages do. */
+
+.scanner-container {
     height: 80vh;
+    min-height: 420px;
 }

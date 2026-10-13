@@ -8,7 +8,71 @@ import {
     pcEditViewerUiConfig
 } from "./uiConfig.js";
 
+// ---------------------------------------------------------------------------
+// SDK versions for engine resources loaded from the jsDelivr CDN.
+// Keep in sync with the <script>/<link> tags in index.html / index.demo.html.
+// ---------------------------------------------------------------------------
+const DCV_BUNDLE_VERSION = "3.6.3200";
+const DCV_DATA_VERSION = "1.2.2";
+const DDV_VERSION = "5.0.1";
+const DWT_VERSION = "19.4.4";
+const CDN = "https://cdn.jsdelivr.net/npm/";
+
+// ---------------------------------------------------------------------------
+// License handling
+//
+// The standalone build (index.html) activates through the in-app license flow:
+// the visitor pastes a key on the Home page. The hosted Codepool demo
+// (index.demo.html) sets window.DEMO_BUILD, which switches to automatic
+// activation with a hostname-resolved key — the Codepool license is bound to
+// dynamsoft.com; anywhere else (localhost, a fork, a staging host) the SDK's
+// public 24-hour trial key keeps the page usable. This mirrors the license
+// logic in the sibling Codepool demos (demos/barcode-mrz-document-scanner).
+// ---------------------------------------------------------------------------
+const BOUND_HOSTS = ['dynamsoft.com'];
+
+// Codepool license — bound to dynamsoft.com, shared by the /codepool/demos/ pages.
+const CODEPOOL_LICENSE_KEY = 'DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAwLTEwMTY0ODQ5MCIsIm1haW5TZXJ2ZXJVUkwiOiJodHRwczovL21sdHMuZHluYW1zb2Z0LmNvbS8iLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMCIsInN0YW5kYnlTZXJ2ZXJVUkwiOiJodHRwczovL3NsdHMuZHluYW1zb2Z0LmNvbS8iLCJjaGVja0NvZGUiOjE0MDA4MDY1Mjl9';
+
+// SDK public trial key — no domain binding, good for 24 hours.
+const TRIAL_LICENSE_KEY = 'DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==';
+
+/* Analytics shim: the hosted page loads demos/shared/analytics.js, but the
+   shared helper must never be a hard dependency — if it is missing everything
+   still works, it just reports nothing. */
+const analytics = window.DemoAnalytics || {
+    action: function () { /* noop */ },
+};
+
+function isBoundHost() {
+    const host = window.location.hostname.toLowerCase();
+    return BOUND_HOSTS.some((bound) => host === bound || host.endsWith('.' + bound));
+}
+
+let resolvedLicenseKey = null;
+
+function resolveLicenseKey() {
+    if (resolvedLicenseKey) {
+        return resolvedLicenseKey;
+    }
+    if (isBoundHost()) {
+        resolvedLicenseKey = CODEPOOL_LICENSE_KEY;
+        return resolvedLicenseKey;
+    }
+    console.info('[demo] Using the SDK trial license: the Codepool license is bound to '
+        + BOUND_HOSTS.join(', ') + ' and cannot activate on "' + window.location.hostname + '".');
+    analytics.action('license_fallback', { host: window.location.hostname });
+    resolvedLicenseKey = TRIAL_LICENSE_KEY;
+    return resolvedLicenseKey;
+}
+
 let isInitialized = false;
+// Tracks an in-flight (or finished) activation so the example pages can wait
+// for the hosted demo's automatic activation instead of failing on a cold page.
+let activationInFlight = null;
+// The license key that the SDK (and the Web TWAIN REST example) is using.
+let activeLicense = '';
+
 let overlay = null;
 let context = null;
 let videoSelect = null;
@@ -100,13 +164,6 @@ function decodeImage(dotnetRef, url, visionType) {
         }
     }
     img.src = url
-}
-
-function updateResolution() {
-    if (cameraEnhancer) {
-        let resolution = cameraEnhancer.getResolution();
-        updateOverlay(resolution.width, resolution.height);
-    }
 }
 
 function listCameras(deviceInfos) {
@@ -278,54 +335,111 @@ async function initMRZ() {
     console.log(ret);
 }
 
+/* Actual activation routine. Assumes it is only entered once at a time —
+   callers go through startActivation(). */
+async function activateSDK(license) {
+    let ok = false;
+    try {
+        // Point every engine at the jsDelivr CDN copy of the SDK that matches
+        // the versions in index.html. This keeps the app bundle free of the
+        // ~200 MB of wasm/model resources.
+        Dynamsoft.Core.CoreModule.engineResourcePaths = {
+            dcvBundle: CDN + "dynamsoft-capture-vision-bundle@" + DCV_BUNDLE_VERSION + "/dist/",
+            dcvData: CDN + "dynamsoft-capture-vision-data@" + DCV_DATA_VERSION + "/"
+        };
+
+        // Visit https://www.dynamsoft.com/customer/license/trialLicense/?product=dcv&package=cross-platform to get a trial license for capture vision suite.
+        await Dynamsoft.License.LicenseManager.initLicense(license, true);
+
+        // Capture Vision Router 3.6 expects the recognition modules to be
+        // loaded explicitly; relying on lazy loading can leave capture()
+        // unresolved on the first call.
+        await Dynamsoft.Core.CoreModule.loadWasm();
+
+        cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
+
+        // Dynamsoft Document Viewer 5.0 splits its features into plugins that
+        // must be loaded (ddv-plugin-*.js in index.html) and installed before
+        // Core.init(). Without the camera plugin, creating a CaptureViewer
+        // fails with "The 'camera' plugin is not installed."
+        Dynamsoft.DDV.use(Dynamsoft.DDV.CameraPlugin);
+        Dynamsoft.DDV.use(Dynamsoft.DDV.AnnotationPlugin);
+        Dynamsoft.DDV.use(Dynamsoft.DDV.ImagePdfParserPlugin);
+
+        Dynamsoft.DDV.Core.license = license;
+        Dynamsoft.DDV.Core.engineResourcePath = CDN + "dynamsoft-document-viewer@" + DDV_VERSION + "/dist/engine";
+        await Dynamsoft.DDV.Core.init();
+        Dynamsoft.DDV.setProcessingHandler("imageFilter", new Dynamsoft.DDV.ImageFilter());
+
+        Dynamsoft.DWT.ResourcesPath = CDN + "dwt@" + DWT_VERSION + "/dist";
+        Dynamsoft.DWT.ServiceInstallerLocation = "https://download2.dynamsoft.com/Demo/DWT/Resources/dist/";
+
+        activeLicense = license;
+        isInitialized = true;
+        ok = true;
+        console.log('[sdk] Dynamsoft SDK activated.');
+    } catch (e) {
+        alert(e);
+    }
+    return ok;
+}
+
+function startActivation(license) {
+    if (isInitialized) {
+        return Promise.resolve(true);
+    }
+    if (!activationInFlight) {
+        activationInFlight = activateSDK(license).then((ok) => {
+            if (!ok) {
+                // Allow a retry (e.g. the visitor pastes a better key).
+                activationInFlight = null;
+            }
+            return ok;
+        });
+    }
+    return activationInFlight;
+}
+
+/* Example pages call this before touching the SDK: on the hosted demo the
+   activation may still be running when the page opens (deep link or fast
+   navigation), so wait for it instead of failing with "activate first". */
+async function ensureActivated() {
+    if (isInitialized) {
+        return true;
+    }
+    if (activationInFlight) {
+        await activationInFlight;
+    }
+    return isInitialized;
+}
+
 window.jsFunctions = {
 
     setLicense: async function setLicense(license) {
         if (isInitialized) return true;
-
-        try {
-            Dynamsoft.Core.CoreModule.engineResourcePaths.rootDirectory = "https://cdn.jsdelivr.net/npm";
-            //Dynamsoft.Core.CoreModule.engineResourcePaths = {
-            //    std: "https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-std@1.2.10/dist/",
-            //    dip: "https://cdn.jsdelivr.net/npm/dynamsoft-image-processing@2.2.30/dist/",
-            //    core: "https://cdn.jsdelivr.net/npm/dynamsoft-core@3.2.30/dist/",
-            //    license: "https://cdn.jsdelivr.net/npm/dynamsoft-license@3.2.21/dist/",
-            //    cvr: "https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-router@2.2.30/dist/",
-            //    dce: "https://cdn.jsdelivr.net/npm/dynamsoft-camera-enhancer@4.0.3/dist/",
-            //    dbr: "https://cdn.jsdelivr.net/npm/dynamsoft-barcode-reader@10.2.10/dist/",
-            //    dlr: "https://cdn.jsdelivr.net/npm/dynamsoft-label-recognizer@3.2.30/dist/",
-            //    dcp: "https://cdn.jsdelivr.net/npm/dynamsoft-code-parser@2.2.10/dist/",
-            //    ddn: "https://cdn.jsdelivr.net/npm/dynamsoft-document-normalizer@2.2.10/dist/",
-            //    dnn: "https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-dnn@1.0.20/dist/",
-            //    dlrData: "https://cdn.jsdelivr.net/npm/dynamsoft-label-recognizer-data@1.0.11/dist/",
-            //};
-            //Dynamsoft.DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@latest/dist/engine";
-
-            Dynamsoft.License.LicenseManager.initLicense(license, true);
-
-            await Dynamsoft.Core.CoreModule.loadWasm(["DBR", "DDN", "DLR"]);
-
-            cvr = await Dynamsoft.CVR.CaptureVisionRouter.createInstance();
-
-            Dynamsoft.DDV.Core.license = license;
-            Dynamsoft.DDV.Core.engineResourcePath = "https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.2.1/dist/engine";
-            Dynamsoft.DDV.setProcessingHandler("imageFilter", new Dynamsoft.DDV.ImageFilter());
-            await Dynamsoft.DDV.Core.init();
-
-            Dynamsoft.DWT.ResourcesPath = "https://cdn.jsdelivr.net/npm/dwt@19.3.2/dist";
-            Dynamsoft.DWT.ServiceInstallerLocation = "https://download2.dynamsoft.com/Demo/DWT/Resources/dist/";
-            //Dynamsoft.DWT.ProductKey = license;
-
-            isInitialized = true;
-        } catch (e) {
-            alert(e);
-            return false;
+        return await startActivation(license);
+    },
+    isHostedDemo: function isHostedDemo() {
+        return !!window.DEMO_BUILD;
+    },
+    isSDKReady: function isSDKReady() {
+        return isInitialized;
+    },
+    /* Resolves when the (automatic) activation settles; used by the Home page
+       to flip its status chip from "Initializing…" to "ready". */
+    waitForActivation: async function waitForActivation() {
+        return await ensureActivated();
+    },
+    licenseNote: function licenseNote() {
+        if (!window.DEMO_BUILD) {
+            return 'your own license';
         }
-
-        return true;
+        return isBoundHost()
+            ? 'Codepool license bound to dynamsoft.com'
+            : 'public 24-hour trial license';
     },
     initBarcodeReader: async function () {
-        if (!isInitialized) {
+        if (!(await ensureActivated())) {
             alert("Please set the license first.");
             return;
         }
@@ -338,22 +452,36 @@ window.jsFunctions = {
             alert(e);
         }
     },
-    initBarcodeScanner: async function (dotnetRef, videoId, selectId, overlayId) {
-        if (!isInitialized) {
+    initBarcodeScanner: async function (dotnetRef, videoId, selectId) {
+        if (!(await ensureActivated())) {
             alert("Please set the license first.");
             return;
         }
-        let canvas = document.getElementById(overlayId);
-        initOverlay(canvas);
+        // Camera mode draws nothing on the external canvas: DCE keeps a
+        // dedicated drawing layer per product (1 = document, 2 = text line /
+        // MRZ, 3 = barcode) and maps the detection coordinates to the
+        // viewfinder internally. Drawing the boxes ourselves produced
+        // misaligned overlays whenever the viewfinder aspect ratio differed
+        // from the camera stream, so camera mode relies on those built-in
+        // layers; the manual canvas is only used for uploaded images.
+        overlay = null;
+        context = null;
         videoSelect = document.getElementById(selectId);
         videoSelect.onchange = openCamera;
 
         try {
-            templateName = 'ReadSingleBarcode'; // For better performance
+            // ReadBarcodes_Default decodes every barcode in view;
+            // ReadSingleBarcode only ever returned the first one.
+            templateName = 'ReadBarcodes_Default';
 
             dispose();
 
             let cameraView = await Dynamsoft.DCE.CameraView.createInstance();
+            // DCE defaults to objectFit "contain", which renders a portrait
+            // phone stream as a narrow pillar inside a wide viewfinder.
+            // "cover" fills the stage; the viewfinder's own aspect ratio does
+            // the cropping.
+            cameraView.setVideoFit('cover');
             cameraEnhancer = await Dynamsoft.DCE.CameraEnhancer.createInstance(cameraView);
 
             let uiElement = document.getElementById(videoId);
@@ -380,10 +508,6 @@ window.jsFunctions = {
                 },
             });
 
-            cameraEnhancer.on('played', () => {
-                updateResolution();
-            });
-
 
         } catch (e) {
             alert(e);
@@ -392,6 +516,10 @@ window.jsFunctions = {
         return true;
     },
     selectFile: async function (dotnetRef, overlayId, imageId, visionType) {
+        if (!(await ensureActivated())) {
+            alert("Please set the license first.");
+            return;
+        }
         if (cameraEnhancer) {
             cameraEnhancer.dispose();
             cameraEnhancer = null;
@@ -447,7 +575,7 @@ window.jsFunctions = {
         }
     },
     initDocumentViewer: async function (containerId) {
-        if (!isInitialized) {
+        if (!(await ensureActivated())) {
             alert("Please set the license first.");
             return;
         }
@@ -463,7 +591,7 @@ window.jsFunctions = {
         }
     },
     initDocumentScanner: async function (containerId) {
-        if (!isInitialized) {
+        if (!(await ensureActivated())) {
             alert("Please set the license first.");
             return;
         }
@@ -529,7 +657,7 @@ window.jsFunctions = {
         }
     },
     initMrzReader: async function () {
-        if (!isInitialized) {
+        if (!(await ensureActivated())) {
             alert("Please set the license first.");
             return;
         }
@@ -541,13 +669,15 @@ window.jsFunctions = {
             console.log(e);
         }
     },
-    initMrzScanner: async function (dotnetRef, videoId, selectId, overlayId) {
-        if (!isInitialized) {
+    initMrzScanner: async function (dotnetRef, videoId, selectId) {
+        if (!(await ensureActivated())) {
             alert("Please set the license first.");
             return;
         }
-        let canvas = document.getElementById(overlayId);
-        initOverlay(canvas);
+        // Camera mode: the MRZ boxes are rendered by DCE's text-line drawing
+        // layer (layer 2); see the note in initBarcodeScanner.
+        overlay = null;
+        context = null;
         videoSelect = document.getElementById(selectId);
         videoSelect.onchange = openCamera;
 
@@ -559,6 +689,9 @@ window.jsFunctions = {
             await initMRZ();
 
             let cameraView = await Dynamsoft.DCE.CameraView.createInstance();
+            // Fill the viewfinder with the camera stream instead of
+            // letterboxing it (same rationale as the barcode scanner above).
+            cameraView.setVideoFit('cover');
             cameraEnhancer = await Dynamsoft.DCE.CameraEnhancer.createInstance(cameraView);
 
             let uiElement = document.getElementById(videoId);
@@ -567,15 +700,21 @@ window.jsFunctions = {
             cameraView.getUIElement().shadowRoot?.querySelector('.dce-sel-camera')?.setAttribute('style', 'display: none');
             cameraView.getUIElement().shadowRoot?.querySelector('.dce-sel-resolution')?.setAttribute('style', 'display: none');
 
+            // Restrict capture to the band where the MRZ sits: it improves
+            // recognition and shows a scan-region hint on phones.
+            cameraEnhancer.setScanRegion({
+                x: 10,
+                y: 30,
+                width: 80,
+                height: 40,
+                isMeasuredInPercentage: true
+            });
+
             cvr.setInput(cameraEnhancer);
             cvr.addResultReceiver({
                 onCapturedResultReceived: (result) => {
                     showMrzResults(result, dotnetRef);
                 },
-            });
-
-            cameraEnhancer.on('played', () => {
-                updateResolution();
             });
 
 
@@ -586,12 +725,20 @@ window.jsFunctions = {
         return true;
     },
     initWebTwain: async function (containerId, width, height) {
-        if (!isInitialized) {
+        if (!(await ensureActivated())) {
             alert("Please set the license first.");
             return;
         }
 
         try {
+            // Cap the fixed 800x800 viewer to the available width so it cannot
+            // overflow the layout on phones; keep it square.
+            const containerEl = document.getElementById(containerId);
+            if (containerEl && containerEl.clientWidth > 0 && width > containerEl.clientWidth) {
+                height = Math.round(height * (containerEl.clientWidth / width));
+                width = containerEl.clientWidth;
+            }
+
             await new Promise((resolve, reject) => {
                 Dynamsoft.DWT.CreateDWTObjectEx({ "WebTwainId": containerId }, (obj) => {
                     dwtObject = obj;
@@ -735,3 +882,14 @@ window.jsFunctions = {
     }
 };
 
+// ---------------------------------------------------------------------------
+// Hosted demo bootstrap
+//
+// index.demo.html sets window.DEMO_BUILD before this module loads. Activate
+// immediately so that deep links (opening /mrzscanner directly, for example)
+// do not have to wait for the Blazor UI to come up: the example pages await
+// the activation via ensureActivated().
+// ---------------------------------------------------------------------------
+if (window.DEMO_BUILD) {
+    startActivation(resolveLicenseKey());
+}

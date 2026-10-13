@@ -3,66 +3,59 @@
 @using Newtonsoft.Json;
 @inject AppStateService AppState
 
-<h1>Digitizing Documents in Blazor</h1>
-
 <div id="loading-indicator" class="loading-indicator" style="@(isLoading ? "display: flex;" : "display: none;")">
     <div class="spinner"></div>
 </div>
 
-<div class="connection">
-    <div class="row">
-        <div>
-            <label>License key: </label>
-            <div class="filler"></div>
-            <input type="text" placeholder="@licenseKey" @bind="licenseKey">
-        </div>
-    </div>
+<div class="card">
+    <h2>Web TWAIN REST API</h2>
+    <p class="card-note">Acquire scans through the Dynamsoft Service REST API running on this machine. Requires the Dynamic Web TWAIN service to be installed.</p>
 
-    <div class="row">
-        <div>
-            <label>Enter host address: </label>
-            <div class="filler"></div>
+    <div class="connection">
+        <div class="control-row">
+            <label for="license">License key</label>
+            <input type="text" id="license" placeholder="@licenseKey" @bind="licenseKey">
+        </div>
+        <div class="control-row">
+            <label for="host">Host address</label>
             <input type="text" id="host" placeholder="@host" @bind="host">
         </div>
-    </div>
-</div>
-
-<!-- Dynamic Web TWAIN -->
-<div class="container" id="dwt">
-    <div class="row">
-        <div>
-            <button @onclick="GetDevices">Get Devices</button>
-            <select id="sources" @bind="selectedValue">
-                @foreach (var device in devices)
-                {
-                    <option value="@device["name"].ToString()">@device["name"].ToString()</option>
-                }
-            </select>
-            <button @onclick="AcquireImage">Scan Documents</button>
-        </div>
-
+        <p class="card-note">This example talks to the local Dynamsoft service REST API directly, so it needs a license key the service itself can validate — a <a href="https://www.dynamsoft.com/customer/license/trialLicense/?product=dwt" target="_blank" rel="noopener">Dynamic Web TWAIN trial license</a> works.</p>
     </div>
 
-    <div class="row">
-        <div class="full-img">
-            <img id="scanner-image" src="@imageDataUrl">
-        </div>
+    <div class="control-row">
+        <button @onclick="GetDevices">Get Devices</button>
+        <select id="sources" @bind="selectedValue">
+            @foreach (var device in devices)
+            {
+                <option value="@device["name"].ToString()">@device["name"].ToString()</option>
+            }
+        </select>
+        <button class="btn-primary" @onclick="AcquireImage">Scan Documents</button>
     </div>
 
-    <div class="row">
-        <div class="thumb-bar" id="thumb-bar">
-            <div class="thumb-box" id="thumb-box">
-                @foreach (var url in imageUrls)
-                {
-                    <img src="@url" @onclick="() => OnImageClick(url)" />
-                }
-            </div>
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <p class="card-note error">@statusMessage</p>
+    }
+
+    <div class="full-img">
+        <img id="scanner-image" src="@imageDataUrl" alt="Scanned document">
+    </div>
+
+    <div class="thumb-bar" id="thumb-bar">
+        <div class="thumb-box" id="thumb-box">
+            @foreach (var url in imageUrls)
+            {
+                <img src="@url" @onclick="() => OnImageClick(url)" alt="Scanned page thumbnail" />
+            }
         </div>
     </div>
 </div>
 
 @code {
     private bool isLoading = false;
+    private string statusMessage = "";
 
     private ScannerController scannerController = new ScannerController();
     private string host = "http://127.0.0.1:18622";
@@ -82,6 +75,7 @@
     public async Task GetDevices()
     {
         isLoading = true;
+        statusMessage = "";
 
         try
         {
@@ -89,79 +83,113 @@
             try
             {
                 var scanners = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(scannerInfo);
-                for (int i = 0; i < scanners.Count; i++)
+                devices.Clear();
+                if (scanners != null)
                 {
-                    var scanner = scanners[i];
-                    devices.Add(scanner);
-                    Console.WriteLine($"\nIndex: {i}, Name: {scanner["name"]}");
+                    for (int i = 0; i < scanners.Count; i++)
+                    {
+                        var scanner = scanners[i];
+                        devices.Add(scanner);
+                        Console.WriteLine($"\nIndex: {i}, Name: {scanner["name"]}");
+                    }
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
+                statusMessage = "Could not read the scanner list from the local service: " + ex.Message;
             }
             if (devices.Count > 0)
             {
-                selectedValue = devices[0]["name"].ToString();
+                selectedValue = devices[0]["name"].ToString() ?? string.Empty;
+            }
+            else
+            {
+                statusMessage = "No scanners found. Make sure the Dynamic Web TWAIN service is installed and a scanner driver is available.";
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            statusMessage = "Could not reach the local service at " + host + ". Is the Dynamic Web TWAIN service running?";
         }
 
         isLoading = false;
-        // StateHasChanged();
     }
 
     public async Task AcquireImage()
     {
         if (devices.Count == 0)
         {
+            statusMessage = "Select a scanner first — click \"Get Devices\".";
             return;
         }
 
-        int selectedIndex = devices.FindIndex(device => device["name"].ToString() == selectedValue);
-        if (selectedIndex < 0) return;
-        var parameters = new Dictionary<string, object>
-                {
-                    {"license", licenseKey},
-                    {"device", devices[selectedIndex]["device"]}
-                };
-
-        parameters["config"] = new Dictionary<string, object>
-                {
-                    {"IfShowUI", false},
-                    {"PixelType", 2},
-                    {"Resolution", 200},
-                    {"IfFeederEnabled", false},
-                    {"IfDuplexEnabled", false}
-                };
-        var jobInfo = await scannerController.CreateJob(host, parameters);
-        string jobId = "";
+        isLoading = true;
+        statusMessage = "";
+        StateHasChanged();
 
         try
         {
-            var job = JsonConvert.DeserializeObject<Dictionary<string, object>>(jobInfo);
-            jobId = (string)job["jobuid"];
-
-            if (string.IsNullOrEmpty(jobId))
+            int selectedIndex = devices.FindIndex(device => device["name"].ToString() == selectedValue);
+            if (selectedIndex < 0)
             {
-                Console.WriteLine("Failed to create job.");
+                statusMessage = "The selected scanner is no longer available. Click \"Get Devices\" again.";
+                return;
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-        }
+            var parameters = new Dictionary<string, object>
+            {
+                {"license", licenseKey},
+                {"device", devices[selectedIndex]["device"]},
+                {"autoRun", true}
+            };
 
-        if (!string.IsNullOrEmpty(jobId))
-        {
+            parameters["config"] = new Dictionary<string, object>
+            {
+                {"IfShowUI", false},
+                {"PixelType", 2},
+                {"Resolution", 200},
+                {"IfFeederEnabled", false},
+                {"IfDuplexEnabled", false}
+            };
+
+            var jobInfo = await scannerController.CreateJob(host, parameters);
+
+            // The service reports failures (for example an invalid or expired
+            // license) as a JSON error object without a job id. Surface that
+            // message instead of failing later on the missing "jobuid" key.
+            Dictionary<string, object>? job = null;
+            try
+            {
+                job = JsonConvert.DeserializeObject<Dictionary<string, object>>(jobInfo);
+            }
+            catch (Exception ex)
+            {
+                statusMessage = "Unexpected response from the local service: " + jobInfo + " (" + ex.Message + ")";
+                return;
+            }
+
+            if (job == null || !job.TryGetValue("jobuid", out var uid) || string.IsNullOrEmpty(uid?.ToString()))
+            {
+                statusMessage = "Failed to create the scan job. The service said: " + jobInfo;
+                return;
+            }
+
+            jobId = uid!.ToString()!;
             byte[] bytes = await scannerController.GetImageStream(host, jobId);
             imageDataUrl = $"data:image/png;base64,{Convert.ToBase64String(bytes)}";
             AddImageUrl(imageDataUrl);
         }
-        
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            statusMessage = "Scan failed: " + ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
     }
 
     private void AddImageUrl(string url)
@@ -173,6 +201,4 @@
     {
         imageDataUrl = url;
     }
-
-    
-}   
+}

@@ -1,75 +1,62 @@
-﻿.full-img {
-    width: 640px;
-    height: 640px;
-    border: 1px solid #ccc;
-    display: flex;
-    flex-direction: row;
+﻿/* Web TWAIN REST API page — the shared control/card rules live in
+   wwwroot/css/app.css; this file covers the scan preview and the thumbnail
+   strip only. */
+
+.connection {
+    margin-bottom: 4px;
 }
 
-    .full-img img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-    }
+.connection label {
+    flex: 0 0 auto;
+    min-width: 110px;
+}
+
+.full-img {
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: 1 / 1;
+    margin: 8px 0 16px;
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius);
+    background: #1f1f21;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.full-img img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
 
 .thumb-bar {
-    display: block;
-    width: 640px;
-    height: 160px;
+    width: 100%;
+    max-width: 640px;
+    height: 120px;
     overflow-x: auto;
-    border: 1px solid #ccc;
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .thumb-box {
-    width: 160px;
-    height: 160px;
+    display: flex;
+    gap: 8px;
+    height: 100%;
+    padding: 6px;
+}
+
+.thumb-box img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
     cursor: pointer;
-    display: flex;
-    border: 1px solid #ccc;
+    border: 1px solid var(--line-dark);
+    border-radius: 6px;
 }
 
-    .thumb-box img {
-        max-width: 100%;
-        max-height: 100%;
-        min-width: 100%;
-        object-fit: contain;
-    }
-
-.container {
-    max-width: 640px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-    text-align: center;
-}
-
-.row {
-    display: flex;
-    justify-content: space-between;
-    margin: 10px auto;
-    align-items: center;
-}
-
-select {
-    width: 200px;
-}
-
-.connection {
-    max-width: 640px;
-    margin: 10px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-input {
-    width: 300px;
-}
-
-.filler {
-    flex-grow: 1;
+.thumb-box img:hover {
+    border-color: var(--dy-orange);
 }

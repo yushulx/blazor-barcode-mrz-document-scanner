@@ -1,25 +1,2 @@
-#videoview {
-    position: relative;
-    max-width: 720px;
-    max-height: 720px;
-    width: 720px;
-    height: 720px;
-    background-color: #eaeaea;
-}
-
-#videoContainer {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    z-index: 1
-}
-
-#overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    object-fit: contain
-}
+/* The viewport rules (#videoview / #videoContainer / #overlay) live in
+   wwwroot/css/app.css so all example pages share them. */

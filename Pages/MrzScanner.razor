@@ -8,21 +8,20 @@
     </div>
 }
 
-<div class="select">
-    <button @onclick="GetCameras">Get Cameras</button>
-    <label for="videoSource"></label>
-    <select id="@videoSourceId"></select>
-    <button @onclick="StartCamera">Open Camera</button>
-    <button @onclick="StopCamera">Stop Camera</button>
-</div>
-
-<div id="videoview">
-    <div class="dce-video-container" id="@videoContainerId"></div>
-    <canvas id="@overlayId"></canvas>
-</div>
-
-<div>
-    <textarea @bind="result"></textarea>
+<div class="card">
+    <h2>MRZ Scanner</h2>
+    <p class="card-note">Scan passport, ID card and visa MRZ with the camera. Hold the document inside the scan band.</p>
+    <div class="control-row">
+        <button @onclick="GetCameras">Get Cameras</button>
+        <label for="@videoSourceId">Camera</label>
+        <select id="@videoSourceId"></select>
+        <button class="btn-primary" @onclick="StartCamera">Open Camera</button>
+        <button @onclick="StopCamera">Stop Camera</button>
+    </div>
+    <div id="videoview">
+        <div class="dce-video-container" id="@videoContainerId"></div>
+    </div>
+    <textarea @bind="result" readonly placeholder="Parsed MRZ data will appear here..."></textarea>
 </div>
 
 @code {
@@ -30,7 +29,6 @@
     private string result = string.Empty;
     private DotNetObjectReference<MrzScanner>? objRef;
     private string videoSourceId = "videoSource";
-    private string overlayId = "overlay";
     private string videoContainerId = "videoContainer";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -38,7 +36,7 @@
         if (firstRender)
         {
             objRef = DotNetObjectReference.Create(this);
-            await JSRuntime.InvokeVoidAsync("jsFunctions.initMrzScanner", objRef, videoContainerId, videoSourceId, overlayId);
+            await JSRuntime.InvokeVoidAsync("jsFunctions.initMrzScanner", objRef, videoContainerId, videoSourceId);
             isLoading = false;
             StateHasChanged();
         }
