@@ -1,114 +1,430 @@
-html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+/* ===========================================================================
+   Blazor Capture Vision — app styles
+
+   Brand: Dynamsoft style guide. The scanning surfaces stay dark (brand gray
+   #323234) so viewfinders and document previews sit on a neutral surround;
+   brand orange #FE8E14 is reserved for primary actions and accents, never
+   body copy. Headings use Oswald, body copy Open Sans.
+
+   This stylesheet serves both the standalone build (index.html) and the
+   hosted Codepool demo (index.demo.html). The layout is responsive — sidebar
+   plus content on desktop, collapsible top-bar navigation on phones — and
+   every control is sized for touch (44px minimum).
+   =========================================================================== */
+
+:root {
+    --dy-orange: #fe8e14;
+    --dy-orange-hover: #e07d0b;
+
+    --dy-gray-900: #323234;
+    --dy-gray-800: #3a3a3d;
+    --dy-gray-700: #606060;
+    --dy-gray-300: #cccccc;
+    --dy-gray-200: #dddddd;
+    --white: #ffffff;
+
+    --font-heading: 'Oswald', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --font-body: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'Courier New', Courier, monospace;
+
+    /* Hairlines and translucent fills that read on the dark surface. */
+    --line-dark: rgba(255, 255, 255, 0.14);
+    --fill-dark: rgba(255, 255, 255, 0.07);
+
+    /* Layout metrics. */
+    --page-max: 1200px;
+    --radius: 12px;
+    --tap: 44px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--font-body);
+    /* No `background-attachment: fixed` on purpose: fixed backgrounds only
+       paint the first viewport, so screenshot tools and scrolled pages show
+       the canvas default below the fold. A plain gradient stretches with the
+       content and renders correctly everywhere. */
+    background: linear-gradient(180deg, var(--dy-gray-800) 0%, var(--dy-gray-900) 55%);
+    min-height: 100vh;
+    margin: 0;
+    color: var(--white);
+    line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    line-height: 1.25;
 }
 
 h1:focus {
     outline: none;
 }
 
-a, .btn-link {
-    color: #0071c1;
+h1 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
 }
 
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+h2 {
+    font-size: clamp(1.15rem, 2.6vw, 1.5rem);
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+h3 {
+    font-size: 1.05rem;
 }
 
-.content {
-    padding-top: 1.1rem;
+p {
+    font-size: 0.95rem;
+    color: var(--dy-gray-200);
 }
 
-.valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
+a,
+.btn-link {
+    color: var(--dy-orange);
 }
 
-.invalid {
-    outline: 1px solid red;
+a:hover {
+    color: var(--dy-orange-hover);
 }
-
-.validation-message {
-    color: red;
-}
-
-#blazor-error-ui {
-    background: lightyellow;
-    bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-    display: none;
-    left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
-    position: fixed;
-    width: 100%;
-    z-index: 1000;
-}
-
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
-    }
-
-.blazor-error-boundary {
-    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
-    padding: 1rem 1rem 1rem 3.7rem;
-    color: white;
-}
-
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
-
-.loading-progress {
-    position: relative;
-    display: block;
-    width: 8rem;
-    height: 8rem;
-    margin: 20vh auto 1rem auto;
-}
-
-    .loading-progress circle {
-        fill: none;
-        stroke: #e0e0e0;
-        stroke-width: 0.6rem;
-        transform-origin: 50% 50%;
-        transform: rotate(-90deg);
-    }
-
-        .loading-progress circle:last-child {
-            stroke: #1b6ec2;
-            stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
-            transition: stroke-dasharray 0.05s ease-in-out;
-        }
-
-.loading-progress-text {
-    position: absolute;
-    text-align: center;
-    font-weight: bold;
-    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
-}
-
-    .loading-progress-text:after {
-        content: var(--blazor-load-percentage-text, "Loading");
-    }
 
 code {
-    color: #c02d76;
+    font-family: var(--font-mono);
+    color: #f0a35e;
 }
 
-.loading-indicator {
+/* ---------------------------------------------------------------------------
+   Cards
+   --------------------------------------------------------------------------- */
+
+.card {
+    max-width: 860px;
+    margin: 0 auto 20px;
+    padding: 20px;
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius);
+    background: var(--fill-dark);
+}
+
+.card-note {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: var(--dy-gray-300);
+}
+
+.card-note.error {
+    color: #ff8787;
+}
+
+/* Decoded text line shown by the reader examples. */
+.p-result {
+    margin: 4px 0 12px;
+    font-weight: 600;
+    color: var(--dy-orange);
+    overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------------------
+   Controls
+   --------------------------------------------------------------------------- */
+
+button,
+.btn {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    min-height: var(--tap);
+    padding: 10px 18px;
+    border: 1px solid var(--line-dark);
+    border-radius: 8px;
+    background: var(--fill-dark);
+    color: var(--white);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:hover,
+.btn:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+button:disabled,
+.btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.btn-primary,
+button.btn-primary {
+    background: var(--dy-orange);
+    border-color: var(--dy-orange);
+    color: #fff;
+}
+
+.btn-primary:hover,
+button.btn-primary:hover {
+    background: var(--dy-orange-hover);
+    border-color: var(--dy-orange-hover);
+}
+
+input[type="text"],
+input[type="search"],
+select,
+textarea {
+    width: 100%;
+    min-height: var(--tap);
+    padding: 10px 12px;
+    border: 1px solid var(--line-dark);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.25);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--dy-orange);
+    box-shadow: 0 0 0 3px rgba(254, 142, 20, 0.25);
+}
+
+select option {
+    color: #222;
+    background: #fff;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+}
+
+/* A labelled row of controls (camera pickers, action buttons). */
+.control-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.control-row label {
+    color: var(--dy-gray-200);
+    font-size: 0.9rem;
+}
+
+.control-row select {
+    width: auto;
+    min-width: 160px;
+    flex: 0 1 320px;
+}
+
+.control-row button {
+    flex: 0 0 auto;
+}
+
+/* Home page: license activation row. */
+.license-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.license-row input {
+    flex: 1 1 260px;
+}
+
+.license-row button {
+    flex: 0 0 auto;
+}
+
+/* ---------------------------------------------------------------------------
+   SDK status chip (hosted demo)
+   --------------------------------------------------------------------------- */
+
+.sdk-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0 4px;
+    padding: 10px 14px;
+    border: 1px solid var(--line-dark);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    font-size: 0.9rem;
+    color: var(--dy-gray-200);
+}
+
+.sdk-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dy-orange);
+    flex: 0 0 auto;
+}
+
+.sdk-status.is-busy .sdk-status-dot {
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+.sdk-status.is-ready .sdk-status-dot {
+    background: #37b24d;
+}
+
+.sdk-status-note {
+    color: var(--dy-gray-300);
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.4;
+        transform: scale(0.75);
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   Examples grid (Home page)
+   --------------------------------------------------------------------------- */
+
+.examples {
+    max-width: 860px;
+    margin: 28px auto 20px;
+}
+
+.examples h2 {
+    margin-bottom: 14px;
+}
+
+.example-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+}
+
+.example-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: var(--tap);
+    padding: 16px;
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius);
+    background: var(--fill-dark);
+    color: var(--white);
+    text-decoration: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.example-card:hover {
+    border-color: var(--dy-orange);
+    background: rgba(254, 142, 20, 0.08);
+    color: var(--white);
+}
+
+.example-name {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+}
+
+.example-desc {
+    font-size: 0.85rem;
+    color: var(--dy-gray-300);
+}
+
+/* ---------------------------------------------------------------------------
+   Camera / image viewports (shared by the example pages)
+   --------------------------------------------------------------------------- */
+
+#videoview {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    aspect-ratio: 4 / 3;
+    max-height: 72vh;
+    background-color: #1f1f21;
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+#videoContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+#imageview {
+    position: relative;
+    width: 100%;
+    max-width: 720px;
+    min-height: 220px;
+    background-color: #1f1f21;
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+#image {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+    object-fit: contain;
+}
+
+#overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+    /* Image-file mode only: the canvas shares the image's box, so object-fit
+       must match the <img> rule above ("contain") to keep the detection boxes
+       aligned. Camera mode does not use this canvas at all — DCE's built-in
+       drawing layers render the results there. */
+    object-fit: contain;
+}
+
+/* ---------------------------------------------------------------------------
+   Loading indicators
+   --------------------------------------------------------------------------- */
+
+.loading-indicator {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.55);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -116,12 +432,12 @@ code {
 }
 
 .spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #fff;
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--dy-orange);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
-    background: linear-gradient(to right, #FF0000 0%, #FF8000 17%, #FFFF00 33%, #00FF00 50%, #00FFFF 67%, #0080FF 83%, #0000FF 100%);
+    animation: spin 0.9s linear infinite;
 }
 
 @keyframes spin {
@@ -132,4 +448,84 @@ code {
     to {
         transform: rotate(360deg);
     }
+}
+
+.loading-progress {
+    position: relative;
+    display: block;
+    width: 8rem;
+    height: 8rem;
+    margin: 20vh auto 1rem auto;
+}
+
+.loading-progress circle {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.15);
+    stroke-width: 0.6rem;
+    transform-origin: 50% 50%;
+    transform: rotate(-90deg);
+}
+
+.loading-progress circle:last-child {
+    stroke: var(--dy-orange);
+    stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
+    transition: stroke-dasharray 0.05s ease-in-out;
+}
+
+.loading-progress-text {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+}
+
+.loading-progress-text:after {
+    content: var(--blazor-load-percentage-text, "Loading");
+}
+
+/* ---------------------------------------------------------------------------
+   Error UI / validation
+   --------------------------------------------------------------------------- */
+
+#blazor-error-ui {
+    background: #4a2020;
+    color: #ffd9d9;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.4);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+#blazor-error-ui a {
+    color: #ffb3b3;
+}
+
+.blazor-error-boundary {
+    background: #b32121;
+    padding: 1rem;
+    color: white;
+    border-radius: 8px;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #37b24d;
+}
+
+.invalid {
+    outline: 1px solid #ff6b6b;
+}
+
+.validation-message {
+    color: #ff8787;
 }

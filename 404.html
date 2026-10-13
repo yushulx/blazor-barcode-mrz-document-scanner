@@ -3,17 +3,34 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BlazorCaptureVision</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Blazor Capture Vision — Barcode, MRZ and Document Scanner</title>
+    <!--
+      Standalone entry page (dotnet publish / dotnet run / GitHub Pages).
+
+      The SDK activates through the in-app license flow: the visitor pastes a
+      Dynamsoft license key into the Home page and the examples unlock after it
+      validates. The hosted Codepool demo uses index.demo.html instead, which
+      sets window.DEMO_BUILD so the SDK activates automatically.
+    -->
     <base href="/blazor-barcode-mrz-document-scanner/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="BlazorCaptureVision.styles.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-bundle@3.2.5000/dist/dcv.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.2.1/dist/ddv.css">
-    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@3.2.1/dist/ddv.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dwt@19.3.2/dist/dynamsoft.webtwain.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&amp;family=Oswald:wght@300;400;500&amp;display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-capture-vision-bundle@3.6.3200/dist/dcv.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@5.0.1/dist/ddv.css">
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@5.0.1/dist/ddv.js"></script>
+    <!-- Document Viewer feature plugins (5.0 ships them separately; the app
+         installs them via Dynamsoft.DDV.use() in jsInterop.js). -->
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@5.0.1/dist/plugins/ddv-plugin-camera.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@5.0.1/dist/plugins/ddv-plugin-annotation.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dynamsoft-document-viewer@5.0.1/dist/plugins/ddv-plugin-image-pdf.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dwt@19.4.4/dist/dynamsoft.webtwain.min.js"></script>
     <script type="module" src="jsInterop.js"></script>
 </head>
 

@@ -1,49 +1,36 @@
 /* /Layout/MainLayout.razor.rz.scp.css */
+/* Page frame: sidebar + content on desktop, collapsible top-bar navigation on
+   phones. The 1200px max-width keeps the app aligned with the demo chrome
+   header and footer when it runs as the hosted Codepool demo. */
+
 .page[b-ebumwtjcy7] {
     position: relative;
     display: flex;
     flex-direction: column;
+    max-width: var(--page-max);
+    margin: 0 auto;
+    min-height: 100vh;
 }
 
 main[b-ebumwtjcy7] {
     flex: 1;
+    min-width: 0;
+}
+
+.content[b-ebumwtjcy7] {
+    padding: 20px 16px 44px;
 }
 
 .sidebar[b-ebumwtjcy7] {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    border-bottom: 1px solid var(--line-dark);
 }
-
-.top-row[b-ebumwtjcy7] {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-    height: 3.5rem;
-    display: flex;
-    align-items: center;
-}
-
-    .top-row[b-ebumwtjcy7]  a, .top-row[b-ebumwtjcy7]  .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
-
-    .top-row[b-ebumwtjcy7]  a:hover, .top-row[b-ebumwtjcy7]  .btn-link:hover {
-        text-decoration: underline;
-    }
-
-    .top-row[b-ebumwtjcy7]  a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
 
 @media (max-width: 640.98px) {
-    .top-row[b-ebumwtjcy7] {
-        justify-content: space-between;
-    }
-
-    .top-row[b-ebumwtjcy7]  a, .top-row[b-ebumwtjcy7]  .btn-link {
-        margin-left: 0;
+    .sidebar[b-ebumwtjcy7] {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: #2b2b2d;
     }
 }
 
@@ -53,41 +40,95 @@ main[b-ebumwtjcy7] {
     }
 
     .sidebar[b-ebumwtjcy7] {
-        width: 250px;
+        width: 240px;
+        flex: 0 0 auto;
         height: 100vh;
         position: sticky;
         top: 0;
+        border-bottom: none;
+        border-right: 1px solid var(--line-dark);
     }
 
-    .top-row[b-ebumwtjcy7] {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
-
-    .top-row.auth[b-ebumwtjcy7]  a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
-
-    .top-row[b-ebumwtjcy7], article[b-ebumwtjcy7] {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
+    .content[b-ebumwtjcy7] {
+        padding: 24px 32px 48px;
     }
 }
 /* /Layout/NavMenu.razor.rz.scp.css */
-.navbar-toggler[b-fwbq43dazs] {
-    background-color: rgba(255, 255, 255, 0.1);
-}
+/* Sidebar navigation. On phones the list collapses behind the hamburger
+   button in the top bar; on desktop it is always visible. */
 
 .top-row[b-fwbq43dazs] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     height: 3.5rem;
-    background-color: rgba(0,0,0,0.4);
+    padding: 0 16px;
 }
 
 .navbar-brand[b-fwbq43dazs] {
-    font-size: 1.1rem;
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.navbar-toggler[b-fwbq43dazs] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid var(--line-dark);
+    border-radius: 8px;
+    background: var(--fill-dark);
+    cursor: pointer;
+}
+
+.navbar-toggler-icon[b-fwbq43dazs] {
+    width: 18px;
+    height: 18px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3E%3Cpath fill-rule='evenodd' d='M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E");
+    background-size: cover;
+}
+
+.nav-scrollable[b-fwbq43dazs] {
+    background: #2b2b2d;
+}
+
+.nav-list[b-fwbq43dazs] {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px 16px;
+}
+
+.nav-item[b-fwbq43dazs] {
+    font-size: 0.92rem;
+}
+
+.nav-item[b-fwbq43dazs]  a {
+    display: flex;
+    align-items: center;
+    min-height: var(--tap);
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--dy-gray-200);
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.nav-item[b-fwbq43dazs]  a.active {
+    background: rgba(254, 142, 20, 0.14);
+    color: var(--dy-orange);
+}
+
+.nav-item[b-fwbq43dazs]  a:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--white);
 }
 
 .bi[b-fwbq43dazs] {
@@ -95,9 +136,10 @@ main[b-ebumwtjcy7] {
     position: relative;
     width: 1.25rem;
     height: 1.25rem;
-    margin-right: 0.75rem;
+    margin-right: 0.65rem;
     top: -1px;
     background-size: cover;
+    flex: 0 0 auto;
 }
 
 .bi-house-door-fill-nav-menu[b-fwbq43dazs] {
@@ -112,38 +154,6 @@ main[b-ebumwtjcy7] {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-list-nested' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.5 11.5A.5.5 0 0 1 5 11h10a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 1 3h10a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E");
 }
 
-.nav-item[b-fwbq43dazs] {
-    font-size: 0.9rem;
-    padding-bottom: 0.5rem;
-}
-
-    .nav-item:first-of-type[b-fwbq43dazs] {
-        padding-top: 1rem;
-    }
-
-    .nav-item:last-of-type[b-fwbq43dazs] {
-        padding-bottom: 1rem;
-    }
-
-    .nav-item[b-fwbq43dazs]  a {
-        color: #d7d7d7;
-        border-radius: 4px;
-        height: 3rem;
-        display: flex;
-        align-items: center;
-        line-height: 3rem;
-    }
-
-.nav-item[b-fwbq43dazs]  a.active {
-    background-color: rgba(255,255,255,0.37);
-    color: white;
-}
-
-.nav-item[b-fwbq43dazs]  a:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
-}
-
 @media (min-width: 641px) {
     .navbar-toggler[b-fwbq43dazs] {
         display: none;
@@ -153,261 +163,111 @@ main[b-ebumwtjcy7] {
         /* Never collapse the sidebar for wide screens */
         display: block;
     }
-    
+
     .nav-scrollable[b-fwbq43dazs] {
-        /* Allow sidebar to scroll for tall menus */
+        /* Allow the sidebar to scroll for tall menus */
         height: calc(100vh - 3.5rem);
         overflow-y: auto;
     }
 }
 /* /Pages/BarcodeReader.razor.rz.scp.css */
-#imageview[b-hvm53ibqrr] {
-    position: relative;
-    max-width: 720px;
-    max-height: 720px;
-    width: 720px;
-    height: 720px;
-    background-color: #eaeaea;
-}
-
-#image[b-hvm53ibqrr] {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    object-fit: contain
-}
-
-#overlay[b-hvm53ibqrr] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.p-result[b-hvm53ibqrr] {
-    color: red;
-    font-style: italic;
-}
+/* The viewport rules (#imageview / #image / #overlay) and the result-line
+   styling (.p-result) live in wwwroot/css/app.css so all example pages share
+   them. */
 /* /Pages/BarcodeScanner.razor.rz.scp.css */
-#videoview[b-1r708cmr5h] {
-    position: relative;
-    max-width: 720px;
-    max-height: 720px;
-    width: 720px;
-    height: 720px;
-    background-color: #eaeaea;
-}
-
-#videoContainer[b-1r708cmr5h] {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    z-index: 1
-}
-
-#overlay[b-1r708cmr5h] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    object-fit: contain
-}
+/* The viewport rules (#videoview / #videoContainer / #overlay) live in
+   wwwroot/css/app.css so all example pages share them. */
 /* /Pages/DocumentScanner.razor.rz.scp.css */
-.container[b-w6j2jpllye] {
-    /*width: 88vw;*/
+/* The Dynamsoft Document Viewer UI is mounted inside this container; give it
+   most of the viewport like the other scanner pages do. */
+
+.scanner-container[b-w6j2jpllye] {
     height: 80vh;
+    min-height: 420px;
 }
 /* /Pages/DocumentViewer.razor.rz.scp.css */
-.container[b-opk2qqo6nu] {
-    /*width: 88vw;*/
+/* The Dynamsoft Document Viewer UI is mounted inside this container; give it
+   most of the viewport like the other scanner pages do. */
+
+.scanner-container[b-opk2qqo6nu] {
     height: 80vh;
+    min-height: 420px;
 }
 /* /Pages/MrzReader.razor.rz.scp.css */
-#imageview[b-u7y2zttowu] {
-    position: relative;
-    max-width: 720px;
-    max-height: 720px;
-    width: 720px;
-    height: 720px;
-    background-color: #eaeaea;
+/* The viewport rules (#imageview / #image / #overlay) and the result-field
+   styling (textarea / .p-result) live in wwwroot/css/app.css so all example
+   pages share them. */
+/* /Pages/MrzScanner.razor.rz.scp.css */
+/* The viewport rules (#videoview / #videoContainer / #overlay) and the result
+   field styling (textarea) live in wwwroot/css/app.css so all example pages
+   share them. */
+/* /Pages/WebTwain.razor.rz.scp.css */
+/* The Dynamic Web TWAIN viewer sizes itself in jsInterop.js (initWebTwain);
+   this only adds breathing room under the toolbar. */
+
+.dwt-container[b-8zryjiloln] {
+    margin-top: 8px;
+}
+/* /Pages/WebTwainREST.razor.rz.scp.css */
+/* Web TWAIN REST API page — the shared control/card rules live in
+   wwwroot/css/app.css; this file covers the scan preview and the thumbnail
+   strip only. */
+
+.connection[b-1kqszofe6s] {
+    margin-bottom: 4px;
 }
 
-#image[b-u7y2zttowu] {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    object-fit: contain
+.connection label[b-1kqszofe6s] {
+    flex: 0 0 auto;
+    min-width: 110px;
 }
 
-#overlay[b-u7y2zttowu] {
-    position: absolute;
-    top: 0;
-    left: 0;
+.full-img[b-1kqszofe6s] {
     width: 100%;
-    height: 100%;
+    max-width: 640px;
+    aspect-ratio: 1 / 1;
+    margin: 8px 0 16px;
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius);
+    background: #1f1f21;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.full-img img[b-1kqszofe6s] {
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
 }
 
-.p-result[b-u7y2zttowu] {
-    color: red;
-    font-style: italic;
-}
-
-textarea[b-u7y2zttowu] {
-    width: 720px;
-    height: 200px;
-    margin: 10px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-/* /Pages/MrzScanner.razor.rz.scp.css */
-#videoview[b-krzz35i1h4] {
-    position: relative;
-    max-width: 720px;
-    max-height: 720px;
-    width: 720px;
-    height: 720px;
-    background-color: #eaeaea;
-    margin-right: 20px;
-}
-
-#videoContainer[b-krzz35i1h4] {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    z-index: 1
-}
-
-#overlay[b-krzz35i1h4] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    object-fit: contain
-}
-
-.mrz-result[b-krzz35i1h4] {
-    color: red;
-    font-style: italic;
-}
-
-.container[b-krzz35i1h4] {
-    display: flex; 
-    margin: 0;
-}
-
-.btn[b-krzz35i1h4] {
-    margin: 0 10px;
-    padding: 10px 20px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #fff;
-    background-color: #FE8E14;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.btn:hover[b-krzz35i1h4] {
-    background-color: #FEA543;
-}
-
-textarea[b-krzz35i1h4] {
-    width: 720px;
-    height: 200px;
-    margin: 10px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-/* /Pages/WebTwain.razor.rz.scp.css */
-@page "/webtwain"
-<h3>Component</h3>
-
-@code[b-8zryjiloln] {
-
-}
-/* /Pages/WebTwainREST.razor.rz.scp.css */
-.full-img[b-1kqszofe6s] {
-    width: 640px;
-    height: 640px;
-    border: 1px solid #ccc;
-    display: flex;
-    flex-direction: row;
-}
-
-    .full-img img[b-1kqszofe6s] {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-    }
-
 .thumb-bar[b-1kqszofe6s] {
-    display: block;
-    width: 640px;
-    height: 160px;
+    width: 100%;
+    max-width: 640px;
+    height: 120px;
     overflow-x: auto;
-    border: 1px solid #ccc;
+    border: 1px solid var(--line-dark);
+    border-radius: var(--radius);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .thumb-box[b-1kqszofe6s] {
-    width: 160px;
-    height: 160px;
+    display: flex;
+    gap: 8px;
+    height: 100%;
+    padding: 6px;
+}
+
+.thumb-box img[b-1kqszofe6s] {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
     cursor: pointer;
-    display: flex;
-    border: 1px solid #ccc;
+    border: 1px solid var(--line-dark);
+    border-radius: 6px;
 }
 
-    .thumb-box img[b-1kqszofe6s] {
-        max-width: 100%;
-        max-height: 100%;
-        min-width: 100%;
-        object-fit: contain;
-    }
-
-.container[b-1kqszofe6s] {
-    max-width: 640px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-h1[b-1kqszofe6s] {
-    text-align: center;
-}
-
-.row[b-1kqszofe6s] {
-    display: flex;
-    justify-content: space-between;
-    margin: 10px auto;
-    align-items: center;
-}
-
-select[b-1kqszofe6s] {
-    width: 200px;
-}
-
-.connection[b-1kqszofe6s] {
-    max-width: 640px;
-    margin: 10px auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-input[b-1kqszofe6s] {
-    width: 300px;
-}
-
-.filler[b-1kqszofe6s] {
-    flex-grow: 1;
+.thumb-box img:hover[b-1kqszofe6s] {
+    border-color: var(--dy-orange);
 }
