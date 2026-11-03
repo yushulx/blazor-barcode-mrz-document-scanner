@@ -12,7 +12,7 @@ import {
 // SDK versions for engine resources loaded from the jsDelivr CDN.
 // Keep in sync with the <script>/<link> tags in index.html / index.demo.html.
 // ---------------------------------------------------------------------------
-const DCV_BUNDLE_VERSION = "3.6.3200";
+const DCV_BUNDLE_VERSION = "3.6.5000";
 const DCV_DATA_VERSION = "1.2.2";
 const DDV_VERSION = "5.0.1";
 const DWT_VERSION = "19.5.0";

@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "BlazorCaptureVision",
   "resources": {
-    "hash": "sha256-tjHb3MjmbQiN9kbfh5tbZHYyNJj+d0/m6uMHNFlcWfw=",
+    "hash": "sha256-X11iJeSVcFMBO6UCZwOdHaR3YJdd4I0L8c/yg42mEN8=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Components.xurcfkjlin.wasm": "Microsoft.AspNetCore.Components.wasm",
       "Microsoft.AspNetCore.Components.Web.5fnpqqr84r.wasm": "Microsoft.AspNetCore.Components.Web.wasm",
@@ -64,7 +64,7 @@
       "System.Xml.XDocument.dwvwuhho6j.wasm": "System.Xml.XDocument.wasm",
       "System.fuo59yvmx8.wasm": "System.wasm",
       "System.Private.CoreLib.jrczcx4h4t.wasm": "System.Private.CoreLib.wasm",
-      "BlazorCaptureVision.3nvxme7shj.wasm": "BlazorCaptureVision.wasm",
+      "BlazorCaptureVision.0wokkpsnmh.wasm": "BlazorCaptureVision.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.fd55pqaqpk.js": "dotnet.native.js",
       "dotnet.native.vww2n0y4ua.wasm": "dotnet.native.wasm",
@@ -151,7 +151,7 @@
       "System.Xml.ReaderWriter.200768lq6m.wasm": "sha256-Pk7PeJulzaqpRxUbH+E4jXfFjOb1TbNR2aT7CRGoXa0=",
       "System.Xml.XDocument.dwvwuhho6j.wasm": "sha256-fTvlIPlvO55NMVqd8zFrjd39CKVnn35GZVV3U9gDhxg=",
       "System.fuo59yvmx8.wasm": "sha256-+RGeMNzJKSWnf53s3f9WD9VoxGZWUh51oZnEQzh2PLk=",
-      "BlazorCaptureVision.3nvxme7shj.wasm": "sha256-kaMp6Q5yeWK/jP8zdAilaEBTqtU/v0s6Y7zcVe7XW0g="
+      "BlazorCaptureVision.0wokkpsnmh.wasm": "sha256-AC2/T0M1nejXWir9rJtRYCsvSnPQcnrM1w9eExIOjg4="
     }
   },
   "cacheBootResources": true,
